@@ -1,0 +1,58 @@
+
+// Numbers
+
+contacts> db.nums.insertOne({a:1})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651a782fbd2b9a4eff6dee17")
+}
+contacts> db.nums.insertOne({a:1.4})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651a7834bd2b9a4eff6dee18")
+}
+contacts> db.nums.insertOne({a:numberInt(4)})
+ReferenceError: numberInt is not defined
+contacts> db.nums.insertOne({a:NumberInt(4)})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651a7865bd2b9a4eff6dee19")
+}
+contacts> db.nums.insertOne({a:NumberLong(983987378)})
+Warning: NumberLong: specifying a number as argument is deprecated and may lead to loss of precision, pass a string instead
+{
+  acknowledged: true,
+  insertedId: ObjectId("651a7877bd2b9a4eff6dee1a")
+}
+contacts> db.nums.insertOne({a:NumberLong("983987378")})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651a7883bd2b9a4eff6dee1b")
+}
+contacts> db.nums.insertOne({a:NumberDecimal(983987378.4876874)})
+Warning: NumberDecimal: specifying a number as argument is deprecated and may lead to loss of precision, pass a string instead
+{
+  acknowledged: true,
+  insertedId: ObjectId("651a7894bd2b9a4eff6dee1c")
+}
+contacts> db.nums.insertOne({a:NumberDecimal("983987378.4876874")})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651a789cbd2b9a4eff6dee1d")
+}
+contacts> db.nums.find()
+[
+  { _id: ObjectId("651a782fbd2b9a4eff6dee17"), a: 1 },
+  { _id: ObjectId("651a7834bd2b9a4eff6dee18"), a: 1.4 },
+  { _id: ObjectId("651a7865bd2b9a4eff6dee19"), a: 4 },
+  { _id: ObjectId("651a7877bd2b9a4eff6dee1a"), a: Long("983987378") },
+  { _id: ObjectId("651a7883bd2b9a4eff6dee1b"), a: Long("983987378") },
+  {
+    _id: ObjectId("651a7894bd2b9a4eff6dee1c"),
+    a: Decimal128("983987378.4876873")
+  },
+  {
+    _id: ObjectId("651a789cbd2b9a4eff6dee1d"),
+    a: Decimal128("983987378.4876874")
+  }
+]

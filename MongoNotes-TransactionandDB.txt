@@ -1,0 +1,291 @@
+
+// capped collection where the data is sized , this is good for log or caching
+
+db.createCollection("capped", {capped:true, size:1000})
+
+
+
+
+
+contacts> use tempdb
+switched to db tempdb
+tempdb> db.createCollection("capped", {capped:true, size:10000, max:5})
+{ ok: 1 }
+tempdb> show collections
+capped
+tempdb> db.capped.insertOne({log:"nskjhlskhkjaklhsadkhjksadhkjhskadjhdklsadhkhjsadk", date: new Date(), time:new Timestamp()})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651a7e28bd2b9a4eff6dee1e")
+}
+tempdb> db.capped.insertOne({log:"jkhdsjk ksajhhsda lkdsajljsadljksda", date: new Date(), time:new Timestamp()})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651a7e3cbd2b9a4eff6dee1f")
+}
+tempdb> db.capped.insertOne({log:"jkhdsjk ksajhhsda lk;lskj;lsk;l  andndndnn sda", date: new Date(), time:new Timestamp()})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651a7e49bd2b9a4eff6dee20")
+}
+tempdb> db.capped.insertOne({log:"xyyybbn djhkdhd jdhkjhdkj jdhjhjkdhd", date: new Date(), time:new Timestamp()})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651a7e57bd2b9a4eff6dee21")
+}
+tempdb> db.capped.insertOne({log:"5 djklkdjljdljlkd", date: new Date(), time:new Timestamp()})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651a7e63bd2b9a4eff6dee22")
+}
+tempdb> db.capped.find()
+[
+  {
+    _id: ObjectId("651a7e28bd2b9a4eff6dee1e"),
+    log: 'nskjhlskhkjaklhsadkhjksadhkjhskadjhdklsadhkhjsadk',
+    date: ISODate("2023-10-02T08:24:08.495Z"),
+    time: Timestamp({ t: 1696235048, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7e3cbd2b9a4eff6dee1f"),
+    log: 'jkhdsjk ksajhhsda lkdsajljsadljksda',
+    date: ISODate("2023-10-02T08:24:28.246Z"),
+    time: Timestamp({ t: 1696235068, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7e49bd2b9a4eff6dee20"),
+    log: 'jkhdsjk ksajhhsda lk;lskj;lsk;l  andndndnn sda',
+    date: ISODate("2023-10-02T08:24:41.008Z"),
+    time: Timestamp({ t: 1696235081, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7e57bd2b9a4eff6dee21"),
+    log: 'xyyybbn djhkdhd jdhkjhdkj jdhjhjkdhd',
+    date: ISODate("2023-10-02T08:24:55.092Z"),
+    time: Timestamp({ t: 1696235095, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7e63bd2b9a4eff6dee22"),
+    log: '5 djklkdjljdljlkd',
+    date: ISODate("2023-10-02T08:25:07.369Z"),
+    time: Timestamp({ t: 1696235107, i: 1 })
+  }
+]
+tempdb> db.capped.insertOne({log:"6 djklkdjljdljlkd", date: new Date(), time:new Timestamp()})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651a7e78bd2b9a4eff6dee23")
+}
+tempdb> db.capped.find()
+[
+  {
+    _id: ObjectId("651a7e3cbd2b9a4eff6dee1f"),
+    log: 'jkhdsjk ksajhhsda lkdsajljsadljksda',
+    date: ISODate("2023-10-02T08:24:28.246Z"),
+    time: Timestamp({ t: 1696235068, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7e49bd2b9a4eff6dee20"),
+    log: 'jkhdsjk ksajhhsda lk;lskj;lsk;l  andndndnn sda',
+    date: ISODate("2023-10-02T08:24:41.008Z"),
+    time: Timestamp({ t: 1696235081, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7e57bd2b9a4eff6dee21"),
+    log: 'xyyybbn djhkdhd jdhkjhdkj jdhjhjkdhd',
+    date: ISODate("2023-10-02T08:24:55.092Z"),
+    time: Timestamp({ t: 1696235095, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7e63bd2b9a4eff6dee22"),
+    log: '5 djklkdjljdljlkd',
+    date: ISODate("2023-10-02T08:25:07.369Z"),
+    time: Timestamp({ t: 1696235107, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7e78bd2b9a4eff6dee23"),
+    log: '6 djklkdjljdljlkd',
+    date: ISODate("2023-10-02T08:25:28.071Z"),
+    time: Timestamp({ t: 1696235128, i: 1 })
+  }
+]
+tempdb> db.capped.insertOne({log:"7 djklkdjljdljlkd", date: new Date(), time:new Timestamp()})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651a7e86bd2b9a4eff6dee24")
+}
+tempdb> db.capped.find()
+[
+  {
+    _id: ObjectId("651a7e49bd2b9a4eff6dee20"),
+    log: 'jkhdsjk ksajhhsda lk;lskj;lsk;l  andndndnn sda',
+    date: ISODate("2023-10-02T08:24:41.008Z"),
+    time: Timestamp({ t: 1696235081, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7e57bd2b9a4eff6dee21"),
+    log: 'xyyybbn djhkdhd jdhkjhdkj jdhjhjkdhd',
+    date: ISODate("2023-10-02T08:24:55.092Z"),
+    time: Timestamp({ t: 1696235095, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7e63bd2b9a4eff6dee22"),
+    log: '5 djklkdjljdljlkd',
+    date: ISODate("2023-10-02T08:25:07.369Z"),
+    time: Timestamp({ t: 1696235107, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7e78bd2b9a4eff6dee23"),
+    log: '6 djklkdjljdljlkd',
+    date: ISODate("2023-10-02T08:25:28.071Z"),
+    time: Timestamp({ t: 1696235128, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7e86bd2b9a4eff6dee24"),
+    log: '7 djklkdjljdljlkd',
+    date: ISODate("2023-10-02T08:25:42.945Z"),
+    time: Timestamp({ t: 1696235142, i: 1 })
+  }
+]
+tempdb> db.capped.insertOne({log:"8 l;dk;ld 7 djklkdjljdljlkd", date: new Date(), time:new Timestamp()})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651a7e92bd2b9a4eff6dee25")
+}
+tempdb> db.capped.find()
+[
+  {
+    _id: ObjectId("651a7e57bd2b9a4eff6dee21"),
+    log: 'xyyybbn djhkdhd jdhkjhdkj jdhjhjkdhd',
+    date: ISODate("2023-10-02T08:24:55.092Z"),
+    time: Timestamp({ t: 1696235095, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7e63bd2b9a4eff6dee22"),
+    log: '5 djklkdjljdljlkd',
+    date: ISODate("2023-10-02T08:25:07.369Z"),
+    time: Timestamp({ t: 1696235107, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7e78bd2b9a4eff6dee23"),
+    log: '6 djklkdjljdljlkd',
+    date: ISODate("2023-10-02T08:25:28.071Z"),
+    time: Timestamp({ t: 1696235128, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7e86bd2b9a4eff6dee24"),
+    log: '7 djklkdjljdljlkd',
+    date: ISODate("2023-10-02T08:25:42.945Z"),
+    time: Timestamp({ t: 1696235142, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7e92bd2b9a4eff6dee25"),
+    log: '8 l;dk;ld 7 djklkdjljdljlkd',
+    date: ISODate("2023-10-02T08:25:54.543Z"),
+    time: Timestamp({ t: 1696235154, i: 1 })
+  }
+]
+tempdb> db.capped.insertOne({log:"9 9 th valuesss l;dk;ld 7 djklkdjljdljlkd", date: new Date(), time:new Timestamp()})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651a7eaabd2b9a4eff6dee26")
+}
+tempdb> db.capped.find()
+[
+  {
+    _id: ObjectId("651a7e63bd2b9a4eff6dee22"),
+    log: '5 djklkdjljdljlkd',
+    date: ISODate("2023-10-02T08:25:07.369Z"),
+    time: Timestamp({ t: 1696235107, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7e78bd2b9a4eff6dee23"),
+    log: '6 djklkdjljdljlkd',
+    date: ISODate("2023-10-02T08:25:28.071Z"),
+    time: Timestamp({ t: 1696235128, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7e86bd2b9a4eff6dee24"),
+    log: '7 djklkdjljdljlkd',
+    date: ISODate("2023-10-02T08:25:42.945Z"),
+    time: Timestamp({ t: 1696235142, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7e92bd2b9a4eff6dee25"),
+    log: '8 l;dk;ld 7 djklkdjljdljlkd',
+    date: ISODate("2023-10-02T08:25:54.543Z"),
+    time: Timestamp({ t: 1696235154, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7eaabd2b9a4eff6dee26"),
+    log: '9 9 th valuesss l;dk;ld 7 djklkdjljdljlkd',
+    date: ISODate("2023-10-02T08:26:18.568Z"),
+    time: Timestamp({ t: 1696235178, i: 1 })
+  }
+]
+tempdb> db.capped.insertOne({log:"10 5 shout be removed th valuesss l;dk;ld 7 djklkdjljdljlkd", date: new Date(), time:new Timestamp()})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651a7ebcbd2b9a4eff6dee27")
+}
+tempdb> db.capped.find()
+[
+  {
+    _id: ObjectId("651a7e78bd2b9a4eff6dee23"),
+    log: '6 djklkdjljdljlkd',
+    date: ISODate("2023-10-02T08:25:28.071Z"),
+    time: Timestamp({ t: 1696235128, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7e86bd2b9a4eff6dee24"),
+    log: '7 djklkdjljdljlkd',
+    date: ISODate("2023-10-02T08:25:42.945Z"),
+    time: Timestamp({ t: 1696235142, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7e92bd2b9a4eff6dee25"),
+    log: '8 l;dk;ld 7 djklkdjljdljlkd',
+    date: ISODate("2023-10-02T08:25:54.543Z"),
+    time: Timestamp({ t: 1696235154, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7eaabd2b9a4eff6dee26"),
+    log: '9 9 th valuesss l;dk;ld 7 djklkdjljdljlkd',
+    date: ISODate("2023-10-02T08:26:18.568Z"),
+    time: Timestamp({ t: 1696235178, i: 1 })
+  },
+  {
+    _id: ObjectId("651a7ebcbd2b9a4eff6dee27"),
+    log: '10 5 shout be removed th valuesss l;dk;ld 7 djklkdjljdljlkd',
+    date: ISODate("2023-10-02T08:26:36.808Z"),
+    time: Timestamp({ t: 1696235196, i: 1 })
+  }
+]
+tempdb>
+
+
+
+// transaction
+
+tempdb> db.trans.find()
+[
+  {
+    _id: ObjectId("651a85a0bd2b9a4eff6dee28"),
+    name: 'testtransaction'
+  }
+]
+tempdb> const session=db.getMongo().startSession()
+
+tempdb> session.startTransaction()
+
+tempdb> const temp=session.getDatabase("tempdb").trans
+
+tempdb> temp.find()
+MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+tempdb> temp.insertOne({name:"kljljljkslks"})
+MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+
+
+session.commitTransaction()
+
+session.abortTransaction()

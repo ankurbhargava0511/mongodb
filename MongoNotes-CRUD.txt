@@ -1,0 +1,2587 @@
+//CRUD
+
+//INSERT
+
+testdb> db.cruds.insertOne({_id:"Sports", hobby:"sport"})
+{ acknowledged: true, insertedId: 'Sports' }
+testdb> db.cruds.insertOne({_id:"Cooking", hobby:"cook"})
+{ acknowledged: true, insertedId: 'Cooking' }
+testdb> db.cruds.insertMany([{_id:"Reading", hobby:"Read"},{_id:"Singing",hobby:"Sing"}])
+{ acknowledged: true, insertedIds: { '0': 'Reading', '1': 'Singing' } }
+testdb> db.cruds.insert([{_id:"Run", hobby:"Running"},{_id:"Cards", hobby:"PlayingCards"}])
+DeprecationWarning: Collection.insert() is deprecated. Use insertOne, insertMany, or bulkWrite.
+{ acknowledged: true, insertedIds: { '0': 'Run', '1': 'Cards' } }
+testdb> db.cruds.find().pretty()
+[
+  { _id: 'Sports', hobby: 'sport' },
+  { _id: 'Cooking', hobby: 'cook' },
+  { _id: 'Reading', hobby: 'Read' },
+  { _id: 'Singing', hobby: 'Sing' },
+  { _id: 'Run', hobby: 'Running' },
+  { _id: 'Cards', hobby: 'PlayingCards' }
+]
+
+testdb> db.cruds.insertMany([{_id:"Animal", hobby:"Dog"},{_id:"Singing",hobby:"Sing"},{_id:"Toys",hobby:"Toy"},{_id:"Swim",hobby:"Swim"}])
+Uncaught:
+MongoBulkWriteError: E11000 duplicate key error collection: testdb.cruds index: _id_ dup key: { _id: "Singing" }
+Result: BulkWriteResult {
+  insertedCount: 1,  // Check this
+  matchedCount: 0,
+  modifiedCount: 0,
+  deletedCount: 0,
+  upsertedCount: 0,
+  upsertedIds: {},
+  insertedIds: { '0': 'Animal', '1': 'Singing', '2': 'Toys', '3': 'Swim' }
+}
+Write Errors: [
+  WriteError {
+    err: {
+      index: 1,
+      code: 11000,
+      errmsg: 'E11000 duplicate key error collection: testdb.cruds index: _id_ dup key: { _id: "Singing" }',
+      errInfo: undefined,
+      op: { _id: 'Singing', hobby: 'Sing' }
+    }
+  }
+]
+
+testdb> db.cruds.insertMany([{_id:"Animal", hobby:"Dog"},{_id:"Singing",hobby:"Sing"},{_id:"Toys",hobby:"Toy"},{_id:"Swim",hobby:"Swim"}], {ordered:false})
+Uncaught:
+MongoBulkWriteError: E11000 duplicate key error collection: testdb.cruds index: _id_ dup key: { _id: "Animal" }
+Result: BulkWriteResult {
+  insertedCount: 2,
+  matchedCount: 0,
+  modifiedCount: 0,
+  deletedCount: 0,
+  upsertedCount: 0,
+  upsertedIds: {},
+  insertedIds: { '0': 'Animal', '1': 'Singing', '2': 'Toys', '3': 'Swim' }
+}
+Write Errors: [
+  WriteError {
+    err: {
+      index: 0,
+      code: 11000,
+      errmsg: 'E11000 duplicate key error collection: testdb.cruds index: _id_ dup key: { _id: "Animal" }',
+      errInfo: undefined,
+      op: { _id: 'Animal', hobby: 'Dog' }
+    }
+  },
+  WriteError {
+    err: {
+      index: 1,
+      code: 11000,
+      errmsg: 'E11000 duplicate key error collection: testdb.cruds index: _id_ dup key: { _id: "Singing" }',
+      errInfo: undefined,
+      op: { _id: 'Singing', hobby: 'Sing' }
+    }
+  }
+]
+
+// Write concern
+// No acknowledge by write
+testdb> db.tempdb.insertOne({name:"myname",age:45},{writeConcern:{w:0}})
+{
+  acknowledged: false,
+  insertedId: ObjectId("6518014ba57d777658a41013")
+}
+// with acknowledge
+testdb> db.tempdb.insertOne({name:"writeco",age:25},{writeConcern:{w:1}})
+{
+  acknowledged: true,
+  insertedId: ObjectId("6518016aa57d777658a41014")
+}
+
+// writing to journel
+testdb> db.tempdb.insertOne({name:"writeco",age:25},{writeConcern:{w:1,j:true}})
+{
+  acknowledged: true,
+  insertedId: ObjectId("65180192a57d777658a41015")
+}
+testdb> db.tempdb.insertOne({name:"writewithJ",age:15},{writeConcern:{w:1,j:true}})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651801b9a57d777658a41016")
+
+// adding time out
+testdb> db.tempdb.insertOne({name:"writeJandTimeOu",age:15},{writeConcern:{w:1,j:true,wtimeout:2}})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651801dca57d777658a41017")
+}
+
+
+testdb> db.tempdb.find()
+[
+  {
+    _id: ObjectId("6518014ba57d777658a41013"),
+    name: 'myname',
+    age: 45
+  },
+  {
+    _id: ObjectId("6518016aa57d777658a41014"),
+    name: 'writeco',
+    age: 25
+  },
+  {
+    _id: ObjectId("65180192a57d777658a41015"),
+    name: 'writeco',
+    age: 25
+  },
+  {
+    _id: ObjectId("651801b9a57d777658a41016"),
+    name: 'writewithJ',
+    age: 15
+  },
+  {
+    _id: ObjectId("651801dca57d777658a41017"),
+    name: 'writeJandTimeOu',
+    age: 15
+  }
+]
+
+// Import movies db using campass
+
+27017> show dbs
+admin      40.00 KiB
+config     48.00 KiB
+local      72.00 KiB
+moviesdb  192.00 KiB
+testdb    432.00 KiB
+27017> use moviesdb
+switched to db moviesdb
+moviesdb> show collections
+movies
+moviesdb> db.movies.findOne()
+{
+  _id: ObjectId("6518050f38016f58422b93a4"),
+  id: 1,
+  url: 'http://www.tvmaze.com/shows/1/under-the-dome',
+  name: 'Under the Dome',
+  type: 'Scripted',
+  language: 'English',
+  genres: [ 'Drama', 'Science-Fiction', 'Thriller' ],
+  status: 'Ended',
+  runtime: 60,
+  premiered: '2013-06-24',
+  officialSite: 'http://www.cbs.com/shows/under-the-dome/',
+  schedule: { time: '22:00', days: [ 'Thursday' ] },
+  rating: { average: 6.5 },
+  weight: 91,
+  network: {
+    id: 2,
+    name: 'CBS',
+    country: { name: 'United States', code: 'US', timezone: 'America/New_York' }
+  },
+  webChannel: null,
+  externals: { tvrage: 25988, thetvdb: 264492, imdb: 'tt1553656' },
+  image: {
+    medium: 'http://static.tvmaze.com/uploads/images/medium_portrait/0/1.jpg',
+    original: 'http://static.tvmaze.com/uploads/images/original_untouched/0/1.jpg'
+  },
+  summary: "<p><b>Under the Dome</b> is the story of a small town that is suddenly and inexplicably sealed off from the rest of the world by an enormous transparent dome. The town's inhabitants must deal with surviving the post-apocalyptic conditions while searching for answers about the dome, where it came from and if and when it will go away.</p>",
+  updated: 1529612668,
+  _links: {
+    self: { href: 'http://api.tvmaze.com/shows/1' },
+    previousepisode: { href: 'http://api.tvmaze.com/episodes/185054' }
+  }
+}
+
+//Filter
+//Operator:Compare
+
+moviesdb> db.movies.findOne({name:"The Last Ship"})
+{
+  _id: ObjectId("6518050f38016f58422b93b7"),
+  id: 21,
+  url: 'http://www.tvmaze.com/shows/21/the-last-ship',
+  name: 'The Last Ship',
+  type: 'Scripted',
+  language: 'English',
+  genres: [ 'Drama', 'Action', 'Thriller' ],
+  status: 'Running',
+  runtime: 60,
+  premiered: '2014-06-22',
+  officialSite: 'http://www.tntdrama.com/shows/the-last-ship',
+  schedule: { time: '21:00', days: [ 'Sunday' ] },
+  rating: { average: 7.8 },
+  weight: 100,
+  network: {
+    id: 14,
+    name: 'TNT',
+    country: { name: 'United States', code: 'US', timezone: 'America/New_York' }
+  },
+  webChannel: null,
+  externals: { tvrage: 33158, thetvdb: 269533, imdb: 'tt2402207' },
+  image: {
+    medium: 'http://static.tvmaze.com/uploads/images/medium_portrait/164/412464.jpg',
+    original: 'http://static.tvmaze.com/uploads/images/original_untouched/164/412464.jpg'
+  },
+  summary: "<p>Their mission is simple: Find a cure. Stop the virus. Save the world. When a global pandemic wipes out eighty percent of the planet's population, the crew of a lone naval destroyer must find a way to pull humanity from the brink of extinction.</p>",
+  updated: 1536575637,
+  _links: {
+    self: { href: 'http://api.tvmaze.com/shows/21' },
+    previousepisode: { href: 'http://api.tvmaze.com/episodes/1499133' },
+    nextepisode: { href: 'http://api.tvmaze.com/episodes/1499134' }
+  }
+}
+
+
+moviesdb> db.movies.findOne({runtime:{$eq:60}})
+{
+  _id: ObjectId("6518050f38016f58422b93a4"),
+  id: 1,
+  url: 'http://www.tvmaze.com/shows/1/under-the-dome',
+  name: 'Under the Dome',
+  type: 'Scripted',
+  language: 'English',
+  genres: [ 'Drama', 'Science-Fiction', 'Thriller' ],
+  status: 'Ended',
+  runtime: 60,
+  premiered: '2013-06-24',
+  officialSite: 'http://www.cbs.com/shows/under-the-dome/',
+  schedule: { time: '22:00', days: [ 'Thursday' ] },
+  rating: { average: 6.5 },
+  weight: 91,
+  network: {
+    id: 2,
+    name: 'CBS',
+    country: { name: 'United States', code: 'US', timezone: 'America/New_York' }
+  },
+  webChannel: null,
+  externals: { tvrage: 25988, thetvdb: 264492, imdb: 'tt1553656' },
+  image: {
+    medium: 'http://static.tvmaze.com/uploads/images/medium_portrait/0/1.jpg',
+    original: 'http://static.tvmaze.com/uploads/images/original_untouched/0/1.jpg'
+  },
+  summary: "<p><b>Under the Dome</b> is the story of a small town that is suddenly and inexplicably sealed off from the rest of the world by an enormous transparent dome. The town's inhabitants must deal with surviving the post-apocalyptic conditions while searching for answers about the dome, where it came from and if and when it will go away.</p>",
+  updated: 1529612668,
+  _links: {
+    self: { href: 'http://api.tvmaze.com/shows/1' },
+    previousepisode: { href: 'http://api.tvmaze.com/episodes/185054' }
+  }
+}
+moviesdb> db.movies.findOne({runtime:{$lt:60}})
+{
+  _id: ObjectId("6518050f38016f58422b93bb"),
+  id: 25,
+  url: 'http://www.tvmaze.com/shows/25/hellsing',
+  name: 'Hellsing',
+  type: 'Animation',
+  language: 'Japanese',
+  genres: [ 'Anime', 'Horror', 'Supernatural' ],
+  status: 'Ended',
+  runtime: 30,
+  premiered: '2001-10-10',
+  officialSite: null,
+  schedule: { time: '', days: [ 'Wednesday' ] },
+  rating: { average: 8.3 },
+  weight: 22,
+  network: {
+    id: 131,
+    name: 'Fuji TV',
+    country: { name: 'Japan', code: 'JP', timezone: 'Asia/Tokyo' }
+  },
+  webChannel: null,
+  externals: { tvrage: 9139, thetvdb: 71278, imdb: 'tt0325547' },
+  image: {
+    medium: 'http://static.tvmaze.com/uploads/images/medium_portrait/0/247.jpg',
+    original: 'http://static.tvmaze.com/uploads/images/original_untouched/0/247.jpg'
+  },
+  summary: "<p><b>Hellsing </b>is a 13-part anime based on the manga of the same name. The plot is significantly difficult to that of the the manga although the characters are the same. The show mainly focuses on the hellsing institute that houses the anti-hero named Alucard who swore loyalty to the Helsing family many years before. Alucard being the first ever vampire takes on a new apprentice named Sera's.</p>",
+  updated: 1504676730,
+  _links: {
+    self: { href: 'http://api.tvmaze.com/shows/25' },
+    previousepisode: { href: 'http://api.tvmaze.com/episodes/398491' }
+  }
+}
+moviesdb> db.movies.findOne({runtime:{$gt:60}})
+{
+  _id: ObjectId("6518050f38016f58422b93e7"),
+  id: 70,
+  url: 'http://www.tvmaze.com/shows/70/the-voice',
+  name: 'The Voice',
+  type: 'Reality',
+  language: 'English',
+  genres: [ 'Family', 'Music' ],
+  status: 'Running',
+  runtime: 120,
+  premiered: '2011-04-26',
+  officialSite: 'http://www.nbc.com/the-voice',
+  schedule: { time: '20:00', days: [ 'Monday', 'Tuesday' ] },
+  rating: { average: 7.3 },
+  weight: 90,
+  network: {
+    id: 1,
+    name: 'NBC',
+    country: { name: 'United States', code: 'US', timezone: 'America/New_York' }
+  },
+  webChannel: null,
+  externals: { tvrage: 27447, thetvdb: 247824, imdb: 'tt1839337' },
+  image: {
+    medium: 'http://static.tvmaze.com/uploads/images/medium_portrait/146/365331.jpg',
+    original: 'http://static.tvmaze.com/uploads/images/original_untouched/146/365331.jpg'
+  },
+  summary: '<p><b>The Voice</b> is a reality singing competition show where the idea is to find new singing talent via a series of auditions.</p>',
+  updated: 1536584006,
+  _links: {
+    self: { href: 'http://api.tvmaze.com/shows/70' },
+    previousepisode: { href: 'http://api.tvmaze.com/episodes/1454416' },
+    nextepisode: { href: 'http://api.tvmaze.com/episodes/1482230' }
+  }
+}
+moviesdb>
+
+moviesdb> db.movies.findOne({runtime:{$gte:60}})
+{
+  _id: ObjectId("6518050f38016f58422b93a4"),
+  id: 1,
+  url: 'http://www.tvmaze.com/shows/1/under-the-dome',
+  name: 'Under the Dome',
+  type: 'Scripted',
+  language: 'English',
+  genres: [ 'Drama', 'Science-Fiction', 'Thriller' ],
+  status: 'Ended',
+  runtime: 60,
+  premiered: '2013-06-24',
+  officialSite: 'http://www.cbs.com/shows/under-the-dome/',
+  schedule: { time: '22:00', days: [ 'Thursday' ] },
+  rating: { average: 6.5 },
+  weight: 91,
+  network: {
+    id: 2,
+    name: 'CBS',
+    country: { name: 'United States', code: 'US', timezone: 'America/New_York' }
+  },
+  webChannel: null,
+  externals: { tvrage: 25988, thetvdb: 264492, imdb: 'tt1553656' },
+  image: {
+    medium: 'http://static.tvmaze.com/uploads/images/medium_portrait/0/1.jpg',
+    original: 'http://static.tvmaze.com/uploads/images/original_untouched/0/1.jpg'
+  },
+  summary: "<p><b>Under the Dome</b> is the story of a small town that is suddenly and inexplicably sealed off from the rest of the world by an enormous transparent dome. The town's inhabitants must deal with surviving the post-apocalyptic conditions while searching for answers about the dome, where it came from and if and when it will go away.</p>",
+  updated: 1529612668,
+  _links: {
+    self: { href: 'http://api.tvmaze.com/shows/1' },
+    previousepisode: { href: 'http://api.tvmaze.com/episodes/185054' }
+  }
+}
+moviesdb> db.movies.findOne({runtime:{$lte:60}})
+{
+  _id: ObjectId("6518050f38016f58422b93a4"),
+  id: 1,
+  url: 'http://www.tvmaze.com/shows/1/under-the-dome',
+  name: 'Under the Dome',
+  type: 'Scripted',
+  language: 'English',
+  genres: [ 'Drama', 'Science-Fiction', 'Thriller' ],
+  status: 'Ended',
+  runtime: 60,
+  premiered: '2013-06-24',
+  officialSite: 'http://www.cbs.com/shows/under-the-dome/',
+  schedule: { time: '22:00', days: [ 'Thursday' ] },
+  rating: { average: 6.5 },
+  weight: 91,
+  network: {
+    id: 2,
+    name: 'CBS',
+    country: { name: 'United States', code: 'US', timezone: 'America/New_York' }
+  },
+  webChannel: null,
+  externals: { tvrage: 25988, thetvdb: 264492, imdb: 'tt1553656' },
+  image: {
+    medium: 'http://static.tvmaze.com/uploads/images/medium_portrait/0/1.jpg',
+    original: 'http://static.tvmaze.com/uploads/images/original_untouched/0/1.jpg'
+  },
+  summary: "<p><b>Under the Dome</b> is the story of a small town that is suddenly and inexplicably sealed off from the rest of the world by an enormous transparent dome. The town's inhabitants must deal with surviving the post-apocalyptic conditions while searching for answers about the dome, where it came from and if and when it will go away.</p>",
+  updated: 1529612668,
+  _links: {
+    self: { href: 'http://api.tvmaze.com/shows/1' },
+    previousepisode: { href: 'http://api.tvmaze.com/episodes/185054' }
+  }
+}
+moviesdb> db.movies.findOne({rating.average :{$gt:7}})
+Uncaught:
+SyntaxError: Unexpected token, expected "," (1:25)
+
+> 1 | db.movies.findOne({rating.average :{$gt:7}})
+    |                          ^
+  2 |
+
+moviesdb> db.movies.findOne({"rating.average" :{$gt:7}})
+{
+  _id: ObjectId("6518050f38016f58422b93a5"),
+  id: 2,
+  url: 'http://www.tvmaze.com/shows/2/person-of-interest',
+  name: 'Person of Interest',
+  type: 'Scripted',
+  language: 'English',
+  genres: [ 'Drama', 'Action', 'Crime' ],
+  status: 'Ended',
+  runtime: 60,
+  premiered: '2011-09-22',
+  officialSite: 'http://www.cbs.com/shows/person_of_interest/',
+  schedule: { time: '22:00', days: [ 'Tuesday' ] },
+  rating: { average: 9 },
+  weight: 96,
+  network: {
+    id: 2,
+    name: 'CBS',
+    country: { name: 'United States', code: 'US', timezone: 'America/New_York' }
+  },
+  webChannel: null,
+  externals: { tvrage: 28376, thetvdb: 248742, imdb: 'tt1839578' },
+  image: {
+    medium: 'http://static.tvmaze.com/uploads/images/medium_portrait/163/407679.jpg',
+    original: 'http://static.tvmaze.com/uploads/images/original_untouched/163/407679.jpg'
+  },
+  summary: `<p>You are being watched. The government has a secret system, a machine that spies on you every hour of every day. I know because I built it. I designed the Machine to detect acts of terror but it sees everything. Violent crimes involving ordinary people. People like you. Crimes the government considered "irrelevant". They wouldn't act so I decided I would. But I needed a partner. Someone with the skills to intervene. Hunted by the authorities, we work in secret. You'll never find us. But victim or perpetrator, if your number is up, we'll find you.</p>`,
+  updated: 1535507028,
+  _links: {
+    self: { href: 'http://api.tvmaze.com/shows/2' },
+    previousepisode: { href: 'http://api.tvmaze.com/episodes/659372' }
+  }
+}
+moviesdb> db.movies.findOne({"genres" :"Drama"})
+{
+  _id: ObjectId("6518050f38016f58422b93a4"),
+  id: 1,
+  url: 'http://www.tvmaze.com/shows/1/under-the-dome',
+  name: 'Under the Dome',
+  type: 'Scripted',
+  language: 'English',
+  genres: [ 'Drama', 'Science-Fiction', 'Thriller' ],
+  status: 'Ended',
+  runtime: 60,
+  premiered: '2013-06-24',
+  officialSite: 'http://www.cbs.com/shows/under-the-dome/',
+  schedule: { time: '22:00', days: [ 'Thursday' ] },
+  rating: { average: 6.5 },
+  weight: 91,
+  network: {
+    id: 2,
+    name: 'CBS',
+    country: { name: 'United States', code: 'US', timezone: 'America/New_York' }
+  },
+  webChannel: null,
+  externals: { tvrage: 25988, thetvdb: 264492, imdb: 'tt1553656' },
+  image: {
+    medium: 'http://static.tvmaze.com/uploads/images/medium_portrait/0/1.jpg',
+    original: 'http://static.tvmaze.com/uploads/images/original_untouched/0/1.jpg'
+  },
+  summary: "<p><b>Under the Dome</b> is the story of a small town that is suddenly and inexplicably sealed off from the rest of the world by an enormous transparent dome. The town's inhabitants must deal with surviving the post-apocalyptic conditions while searching for answers about the dome, where it came from and if and when it will go away.</p>",
+  updated: 1529612668,
+  _links: {
+    self: { href: 'http://api.tvmaze.com/shows/1' },
+    previousepisode: { href: 'http://api.tvmaze.com/episodes/185054' }
+  }
+}
+moviesdb> db.movies.findOne({"genres" :"drama"})// It will check with drama not Drama
+null
+moviesdb> db.movies.findOne({"genres" :["drama"]})
+null
+moviesdb> db.movies.findOne({"genres" :["Drama"]}) //If you need to get where genres is exactly "Drama" , not ["Drama",....]
+{
+  _id: ObjectId("6518050f38016f58422b93d1"),
+  id: 48,
+  url: 'http://www.tvmaze.com/shows/48/madam-secretary',
+  name: 'Madam Secretary',
+  type: 'Scripted',
+  language: 'English',
+  genres: [ 'Drama' ],
+  status: 'Running',
+  runtime: 60,
+  premiered: '2014-09-21',
+  officialSite: 'http://www.cbs.com/shows/madam-secretary/',
+  schedule: { time: '22:00', days: [ 'Sunday' ] },
+  rating: { average: 7.9 },
+  weight: 97,
+  network: {
+    id: 2,
+    name: 'CBS',
+    country: { name: 'United States', code: 'US', timezone: 'America/New_York' }
+  },
+  webChannel: null,
+  externals: { tvrage: 37247, thetvdb: 281623, imdb: 'tt3501074' },
+  image: {
+    medium: 'http://static.tvmaze.com/uploads/images/medium_portrait/0/399.jpg',
+    original: 'http://static.tvmaze.com/uploads/images/original_untouched/0/399.jpg'
+  },
+  summary: '<p><b>Madam Secretary</b> follows Elizabeth McCord, the shrewd, determined, newly appointed Secretary of State who drives international diplomacy, battles office politics and circumvents protocol as she negotiates global and domestic issues, both at the White House and at home. A college professor and a brilliant former CIA analyst who left for ethical reasons, Elizabeth returns to public life at the request of the President following the suspicious death of her predecessor. The President values her apolitical leanings, her deep knowledge of the Middle East, her flair for languages and her ability to not just think outside the box, but to not even acknowledge there is a box.</p>',
+  updated: 1535111282,
+  _links: {
+    self: { href: 'http://api.tvmaze.com/shows/48' },
+    previousepisode: { href: 'http://api.tvmaze.com/episodes/1431764' },
+    nextepisode: { href: 'http://api.tvmaze.com/episodes/1489850' }
+  }
+}
+// In - Find only with runtime = 30 or 42
+moviesdb> db.movies.findOne({runtime:{$in:[30,42]}})
+{
+  _id: ObjectId("6518050f38016f58422b93bb"),
+  id: 25,
+  url: 'http://www.tvmaze.com/shows/25/hellsing',
+  name: 'Hellsing',
+  type: 'Animation',
+  language: 'Japanese',
+  genres: [ 'Anime', 'Horror', 'Supernatural' ],
+  status: 'Ended',
+  runtime: 30,
+  premiered: '2001-10-10',
+  officialSite: null,
+  schedule: { time: '', days: [ 'Wednesday' ] },
+  rating: { average: 8.3 },
+  weight: 22,
+  network: {
+    id: 131,
+    name: 'Fuji TV',
+    country: { name: 'Japan', code: 'JP', timezone: 'Asia/Tokyo' }
+  },
+  webChannel: null,
+  externals: { tvrage: 9139, thetvdb: 71278, imdb: 'tt0325547' },
+  image: {
+    medium: 'http://static.tvmaze.com/uploads/images/medium_portrait/0/247.jpg',
+    original: 'http://static.tvmaze.com/uploads/images/original_untouched/0/247.jpg'
+  },
+  summary: "<p><b>Hellsing </b>is a 13-part anime based on the manga of the same name. The plot is significantly difficult to that of the the manga although the characters are the same. The show mainly focuses on the hellsing institute that houses the anti-hero named Alucard who swore loyalty to the Helsing family many years before. Alucard being the first ever vampire takes on a new apprentice named Sera's.</p>",
+  updated: 1504676730,
+  _links: {
+    self: { href: 'http://api.tvmaze.com/shows/25' },
+    previousepisode: { href: 'http://api.tvmaze.com/episodes/398491' }
+  }
+}
+
+// find everything except 30 and 42
+moviesdb> db.movies.findOne({runtime:{$nin:[30,42]}})
+{
+  _id: ObjectId("6518050f38016f58422b93a4"),
+  id: 1,
+  url: 'http://www.tvmaze.com/shows/1/under-the-dome',
+  name: 'Under the Dome',
+  type: 'Scripted',
+  language: 'English',
+  genres: [ 'Drama', 'Science-Fiction', 'Thriller' ],
+  status: 'Ended',
+  runtime: 60,
+  premiered: '2013-06-24',
+  officialSite: 'http://www.cbs.com/shows/under-the-dome/',
+  schedule: { time: '22:00', days: [ 'Thursday' ] },
+  rating: { average: 6.5 },
+  weight: 91,
+  network: {
+    id: 2,
+    name: 'CBS',
+    country: { name: 'United States', code: 'US', timezone: 'America/New_York' }
+  },
+  webChannel: null,
+  externals: { tvrage: 25988, thetvdb: 264492, imdb: 'tt1553656' },
+  image: {
+    medium: 'http://static.tvmaze.com/uploads/images/medium_portrait/0/1.jpg',
+    original: 'http://static.tvmaze.com/uploads/images/original_untouched/0/1.jpg'
+  },
+  summary: "<p><b>Under the Dome</b> is the story of a small town that is suddenly and inexplicably sealed off from the rest of the world by an enormous transparent dome. The town's inhabitants must deal with surviving the post-apocalyptic conditions while searching for answers about the dome, where it came from and if and when it will go away.</p>",
+  updated: 1529612668,
+  _links: {
+    self: { href: 'http://api.tvmaze.com/shows/1' },
+    previousepisode: { href: 'http://api.tvmaze.com/episodes/185054' }
+  }
+}
+
+//Operator:Logical
+
+moviesdb> db.movies.find().count()
+240
+moviesdb> db.movies.find({$or:[{"rating.average":{$lt:5}},{"rating.average":{$gt:9}}]}).count() // any condition meet
+9
+moviesdb> db.movies.find({$nor:[{"rating.average":{$lt:5}},{"rating.average":{$gt:9}}]}).count() // no condition meet
+231
+
+//And Both condition mean
+moviesdb> db.movies.find({$and:[{"rating.average":{$gt:9}},{genres:"Drama"}]}).count()
+3
+moviesdb> db.movies.find({"rating.average":{$gt:9},genres:"Drama"}).count()
+3
+
+//If both are same why we use and
+// give where we have horror 
+moviesdb> db.movies.find({genres:"Drama", genres:"Horror"}).count()
+23
+
+
+moviesdb> db.movies.find({genres:"Drama", genres:"Horror"}, {genres:1, _id:0})
+[
+  { genres: [ 'Drama', 'Horror', 'Romance' ] },
+  { genres: [ 'Drama', 'Fantasy', 'Horror' ] },
+  { genres: [ 'Drama', 'Action', 'Horror' ] },
+  { genres: [ 'Drama', 'Horror', 'Thriller' ] },
+  { genres: [ 'Drama', 'Horror', 'Thriller' ] },
+  { genres: [ 'Anime', 'Horror', 'Supernatural' ] },
+  { genres: [ 'Drama', 'Action', 'Anime', 'Horror' ] },
+  { genres: [ 'Anime', 'Fantasy', 'Horror' ] },
+  { genres: [ 'Drama', 'Horror', 'Thriller' ] },
+  { genres: [ 'Drama', 'Horror', 'Thriller' ] },
+  { genres: [ 'Horror', 'Science-Fiction', 'Thriller' ] },
+  { genres: [ 'Action', 'Horror', 'Science-Fiction' ] },
+  { genres: [ 'Drama', 'Action', 'Horror' ] },
+  { genres: [ 'Action', 'Crime', 'Horror' ] },
+  { genres: [ 'Drama', 'Horror', 'Romance' ] },
+  { genres: [ 'Horror', 'Thriller' ] },
+  { genres: [ 'Drama', 'Fantasy', 'Horror' ] },
+  { genres: [ 'Drama', 'Crime', 'Horror' ] },
+  { genres: [ 'Drama', 'Horror', 'Thriller' ] },
+  { genres: [ 'Drama', 'Horror' ] }
+]
+
+
+moviesdb> db.movies.find({genres:"Drama"}).count()
+153
+moviesdb> db.movies.find({genres:"Horror"}).count()
+23
+moviesdb> db.movies.find({$and:[{genres:"Drama"},{genres:"Horror"}]}).count()
+17
+
+
+moviesdb> db.movies.find({$and:[{genres:"Drama"},{genres:"Horror"}]},{genres:1, _id:0})
+[
+  { genres: [ 'Drama', 'Horror', 'Romance' ] },
+  { genres: [ 'Drama', 'Fantasy', 'Horror' ] },
+  { genres: [ 'Drama', 'Action', 'Horror' ] },
+  { genres: [ 'Drama', 'Horror', 'Thriller' ] },
+  { genres: [ 'Drama', 'Horror', 'Thriller' ] },
+  { genres: [ 'Drama', 'Action', 'Anime', 'Horror' ] },
+  { genres: [ 'Drama', 'Horror', 'Thriller' ] },
+  { genres: [ 'Drama', 'Horror', 'Thriller' ] },
+  { genres: [ 'Drama', 'Action', 'Horror' ] },
+  { genres: [ 'Drama', 'Horror', 'Romance' ] },
+  { genres: [ 'Drama', 'Fantasy', 'Horror' ] },
+  { genres: [ 'Drama', 'Crime', 'Horror' ] },
+  { genres: [ 'Drama', 'Horror', 'Thriller' ] },
+  { genres: [ 'Drama', 'Horror' ] },
+  { genres: [ 'Drama', 'Horror', 'Romance' ] },
+  { genres: [ 'Drama', 'Horror' ] },
+  { genres: [ 'Drama', 'Horror', 'Supernatural' ] }
+]
+
+
+// not 
+moviesdb> db.movies.find({runtime:{$ne:60}}).count()
+70
+moviesdb> db.movies.find({runtime:{$not:{$eq:60}}}).count()
+70
+
+//Operator:Element
+
+
+moviesdb> db.ele.insertOne({name:"Max", age:40})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651847185fd7ecffa7cb53ca")
+}
+moviesdb> db.ele.insertOne({name:"Max", age:null})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651847245fd7ecffa7cb53cb")
+}
+moviesdb> db.ele.insertOne({name:"Max3", age:60})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651847355fd7ecffa7cb53cc")
+}
+moviesdb> db.ele.insertOne({name:"Max43", age:null})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651847435fd7ecffa7cb53cd")
+}
+moviesdb> db.ele.insertOne({name:"Max5", age:null})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651847505fd7ecffa7cb53ce")
+}
+moviesdb> db.ele.insertOne({name:"Max5", age:"67"})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651847615fd7ecffa7cb53cf")
+}
+moviesdb> db.ele.insertOne({name:"Max7", age:"45"})
+{
+  acknowledged: true,
+  insertedId: ObjectId("6518476d5fd7ecffa7cb53d0")
+}
+moviesdb> db.ele.insertOne({name:"Max8", age:"25"})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651847765fd7ecffa7cb53d1")
+}
+moviesdb> db.ele.insertOne({name:"Max9"})
+{
+  acknowledged: true,
+  insertedId: ObjectId("651847865fd7ecffa7cb53d2")
+}
+moviesdb> db.ele.insertOne({name:"Max10"})
+{
+  acknowledged: true,
+  insertedId: ObjectId("6518478d5fd7ecffa7cb53d3")
+}
+
+moviesdb> db.ele.find({age:{$exists:true}})
+[
+  { _id: ObjectId("651847185fd7ecffa7cb53ca"), name: 'Max', age: 40 },
+  { _id: ObjectId("651847245fd7ecffa7cb53cb"), name: 'Max', age: null },
+  { _id: ObjectId("651847355fd7ecffa7cb53cc"), name: 'Max3', age: 60 },
+  {
+    _id: ObjectId("651847435fd7ecffa7cb53cd"),
+    name: 'Max43',
+    age: null
+  },
+  {
+    _id: ObjectId("651847505fd7ecffa7cb53ce"),
+    name: 'Max5',
+    age: null
+  },
+  {
+    _id: ObjectId("651847615fd7ecffa7cb53cf"),
+    name: 'Max5',
+    age: '67'
+  },
+  {
+    _id: ObjectId("6518476d5fd7ecffa7cb53d0"),
+    name: 'Max7',
+    age: '45'
+  },
+  {
+    _id: ObjectId("651847765fd7ecffa7cb53d1"),
+    name: 'Max8',
+    age: '25'
+  }
+]
+moviesdb> db.ele.find({age:{$exists:false}})
+[
+  { _id: ObjectId("651847865fd7ecffa7cb53d2"), name: 'Max9' },
+  { _id: ObjectId("6518478d5fd7ecffa7cb53d3"), name: 'Max10' }
+]
+moviesdb> db.ele.find({age:{$exists:true, $ne:null}})
+[
+  { _id: ObjectId("651847185fd7ecffa7cb53ca"), name: 'Max', age: 40 },
+  { _id: ObjectId("651847355fd7ecffa7cb53cc"), name: 'Max3', age: 60 },
+  {
+    _id: ObjectId("651847615fd7ecffa7cb53cf"),
+    name: 'Max5',
+    age: '67'
+  },
+  {
+    _id: ObjectId("6518476d5fd7ecffa7cb53d0"),
+    name: 'Max7',
+    age: '45'
+  },
+  {
+    _id: ObjectId("651847765fd7ecffa7cb53d1"),
+    name: 'Max8',
+    age: '25'
+  }
+]
+moviesdb> db.ele.find({age:{$type:"number"}})
+[
+  { _id: ObjectId("651847185fd7ecffa7cb53ca"), name: 'Max', age: 40 },
+  { _id: ObjectId("651847355fd7ecffa7cb53cc"), name: 'Max3', age: 60 }
+]
+moviesdb> db.ele.find({age:{$type:"double"}})
+
+moviesdb> db.ele.find({age:{$type:"string"}})
+[
+  {
+    _id: ObjectId("651847615fd7ecffa7cb53cf"),
+    name: 'Max5',
+    age: '67'
+  },
+  {
+    _id: ObjectId("6518476d5fd7ecffa7cb53d0"),
+    name: 'Max7',
+    age: '45'
+  },
+  {
+    _id: ObjectId("651847765fd7ecffa7cb53d1"),
+    name: 'Max8',
+    age: '25'
+  }
+]
+moviesdb> db.ele.find({age:{$type:["string","number"]}})
+[
+  { _id: ObjectId("651847185fd7ecffa7cb53ca"), name: 'Max', age: 40 },
+  { _id: ObjectId("651847355fd7ecffa7cb53cc"), name: 'Max3', age: 60 },
+  {
+    _id: ObjectId("651847615fd7ecffa7cb53cf"),
+    name: 'Max5',
+    age: '67'
+  },
+  {
+    _id: ObjectId("6518476d5fd7ecffa7cb53d0"),
+    name: 'Max7',
+    age: '45'
+  },
+  {
+    _id: ObjectId("651847765fd7ecffa7cb53d1"),
+    name: 'Max8',
+    age: '25'
+  }
+]
+
+
+// Evaluation - (where) is deprecated
+// Regex
+
+moviesdb> db.movies.find({summary:"musical"})
+
+
+
+moviesdb> db.movies.find({summary:{$regex :/musical/}})
+
+// Expr
+
+moviesdb> db.sales.insertMany([{volume:100, target:120},{volume:80, target:100},{volume:100, target:80}, {volumne:150, target:120}])
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId("65184b8d5fd7ecffa7cb53d4"),
+    '1': ObjectId("65184b8d5fd7ecffa7cb53d5"),
+    '2': ObjectId("65184b8d5fd7ecffa7cb53d6"),
+    '3': ObjectId("65184b8d5fd7ecffa7cb53d7")
+  }
+}
+
+// This will compare string volumne and Target
+moviesdb> db.sales.find({$expr:{$gt:["volume", "target"]}})
+[
+  {
+    _id: ObjectId("65184b8d5fd7ecffa7cb53d4"),
+    volume: 100,
+    target: 120
+  },
+  {
+    _id: ObjectId("65184b8d5fd7ecffa7cb53d5"),
+    volume: 80,
+    target: 100
+  },
+  {
+    _id: ObjectId("65184b8d5fd7ecffa7cb53d6"),
+    volume: 100,
+    target: 80
+  },
+  {
+    _id: ObjectId("65184b8d5fd7ecffa7cb53d7"),
+    volumne: 150,
+    target: 120
+  }
+]
+
+// volumne greater the target
+moviesdb> db.sales.find({$expr:{$gt:["$volume", "$target"]}})
+[
+  {
+    _id: ObjectId("65184b8d5fd7ecffa7cb53d6"),
+    volume: 100,
+    target: 80
+  }
+]
+
+// target greater the volume
+moviesdb> db.sales.find({$expr:{$lt:["$volume", "$target"]}})
+[
+  {
+    _id: ObjectId("65184b8d5fd7ecffa7cb53d4"),
+    volume: 100,
+    target: 120
+  },
+  {
+    _id: ObjectId("65184b8d5fd7ecffa7cb53d5"),
+    volume: 80,
+    target: 100
+  },
+  {
+    _id: ObjectId("65184b8d5fd7ecffa7cb53d7"),
+    volumne: 150,
+    target: 120
+  }
+]
+
+
+moviesdb> db.users.insertOne({name:"Anna", hobbies:[{title:"sports", frequency:2},{title:"cars", frequency:2}]})
+{
+  acknowledged: true,
+  insertedId: ObjectId("65185f1f54827bfd41e1570b")
+}
+moviesdb> db.users.insertOne({name:"Ann1", hobbies:[{title:"sports", frequency:3},{title:"cooking", frequency:6}]})
+{
+  acknowledged: true,
+  insertedId: ObjectId("65185f4254827bfd41e1570c")
+}
+moviesdb> db.users.insertOne({name:"max", hobbies:[{title:"cars", frequency:3},{title:"cooking", frequency:6}]})
+{
+  acknowledged: true,
+  insertedId: ObjectId("65185f5754827bfd41e1570d")
+}
+moviesdb> db.users.insertOne({name:"max", hobbies:[{title:"cars", frequency:2},{title:"cooking", frequency:4},{title:"singing", frequency:5}]})
+{
+  acknowledged: true,
+  insertedId: ObjectId("65185f9d54827bfd41e1570e")
+}
+
+// find hobbies=sports
+For array this will not work
+moviesdb> db.users.find({hobbies:"sports"})
+
+moviesdb> db.users.find({hobbies:{title:"sports"}})
+// this will give just one equality item
+moviesdb> db.users.find({hobbies:{title:"sports", frequency:2}})
+[
+  {
+    _id: ObjectId("65185f1f54827bfd41e1570b"),
+    name: 'Anna',
+    hobbies: [
+      { title: 'sports', frequency: 2 },
+      { title: 'cars', frequency: 2 }
+    ]
+  }
+]
+
+// for embedded doc and array use it like
+moviesdb> db.users.find({"hobbies.title":"sports"})
+[
+  {
+    _id: ObjectId("65185f1f54827bfd41e1570b"),
+    name: 'Anna',
+    hobbies: [
+      { title: 'sports', frequency: 2 },
+      { title: 'cars', frequency: 2 }
+    ]
+  },
+  {
+    _id: ObjectId("65185f4254827bfd41e1570c"),
+    name: 'Ann1',
+    hobbies: [
+      { title: 'sports', frequency: 3 },
+      { title: 'cooking', frequency: 6 }
+    ]
+  }
+]
+
+// find where record having hobbies count is 3
+moviesdb> db.users.find({hobbies:{$size:3}})
+[
+  {
+    _id: ObjectId("65185f9d54827bfd41e1570e"),
+    name: 'max',
+    hobbies: [
+      { title: 'cars', frequency: 2 },
+      { title: 'cooking', frequency: 4 },
+      { title: 'singing', frequency: 5 }
+    ]
+  }
+]
+moviesdb> db.users.find()
+[
+  {
+    _id: ObjectId("65185f1f54827bfd41e1570b"),
+    name: 'Anna',
+    hobbies: [
+      { title: 'sports', frequency: 2 },
+      { title: 'cars', frequency: 2 }
+    ]
+  },
+  {
+    _id: ObjectId("65185f4254827bfd41e1570c"),
+    name: 'Ann1',
+    hobbies: [
+      { title: 'sports', frequency: 3 },
+      { title: 'cooking', frequency: 6 }
+    ]
+  },
+  {
+    _id: ObjectId("65185f5754827bfd41e1570d"),
+    name: 'max',
+    hobbies: [
+      { title: 'cars', frequency: 3 },
+      { title: 'cooking', frequency: 6 }
+    ]
+  },
+  {
+    _id: ObjectId("65185f9d54827bfd41e1570e"),
+    name: 'max',
+    hobbies: [
+      { title: 'cars', frequency: 2 },
+      { title: 'cooking', frequency: 4 },
+      { title: 'singing', frequency: 5 }
+    ]
+  }
+]
+
+ find record with hobbies include cars and cooking
+moviesdb> db.users.find({hobbies:{$all:["cars","cooking"]}})
+
+moviesdb> db.users.find({"hobbies.title":{$all:["cars","cooking"]}})
+[
+  {
+    _id: ObjectId("65185f5754827bfd41e1570d"),
+    name: 'max',
+    hobbies: [
+      { title: 'cars', frequency: 3 },
+      { title: 'cooking', frequency: 6 }
+    ]
+  },
+  {
+    _id: ObjectId("65185f9d54827bfd41e1570e"),
+    name: 'max',
+    hobbies: [
+      { title: 'cars', frequency: 2 },
+      { title: 'cooking', frequency: 4 },
+      { title: 'singing', frequency: 5 }
+    ]
+  }
+]
+// this will search element where any title is sport and frequency
+moviesdb> db.users.find({$and:[{"hobbies.title":"sports"}, {"hobbies.frequency":{$gte:2}}]})
+// this will find element where both condition match not entitle document
+moviesdb> db.users.find({hobbies:{$elemMatch:{"title":"sports","frequency":{$gte:2}}}})
+
+
+
+// cursor
+// use cursor.next
+
+const datacursor= db.movies.find()
+moviesdb> datacursor.hasNext()
+true
+moviesdb> datacursor.next()
+
+// sorting
+moviesdb> db.movies.find().sort({"rating.average":1})// Asending
+moviesdb> db.movies.find().sort({"rating.average":-1}) // decending
+
+// limit, Skip
+
+moviesdb> db.movies.find().sort({"rating.average":-1, rating:1}).skip(100).limit(2)
+[
+  {
+    _id: ObjectId("6518050f38016f58422b93e2"),
+    id: 65,
+    url: 'http://www.tvmaze.com/shows/65/bones',
+    name: 'Bones',
+    type: 'Scripted',
+    language: 'English',
+    genres: [ 'Drama', 'Crime', 'Medical' ],
+    status: 'Ended',
+    runtime: 60,
+    premiered: '2005-09-13',
+    officialSite: 'http://www.fox.com/bones',
+    schedule: { time: '21:00', days: [ 'Tuesday' ] },
+    rating: { average: 8.1 },
+    weight: 97,
+    network: {
+      id: 4,
+      name: 'FOX',
+      country: {
+        name: 'United States',
+        code: 'US',
+        timezone: 'America/New_York'
+      }
+    },
+    webChannel: null,
+    externals: { tvrage: 2870, thetvdb: 75682, imdb: 'tt0460627' },
+    image: {
+      medium: 'http://static.tvmaze.com/uploads/images/medium_portrait/80/201202.jpg',
+      original: 'http://static.tvmaze.com/uploads/images/original_untouched/80/201202.jpg'
+    },
+    summary: '<p>F.B.I. Agent Seeley Booth is teamed up with forensic anthropologist Dr. Temperance "Bones" Brennan to solve some of the most baffling and bizarre crimes ever. Booth depends on clues from the living, witnesses and suspects, while Brennan gathers evidence from the dead, relying on her uncanny ability to read clues left behind in the bones of the victims.</p>',
+    updated: 1535462791,
+    _links: {
+      self: { href: 'http://api.tvmaze.com/shows/65' },
+      previousepisode: { href: 'http://api.tvmaze.com/episodes/1067425' }
+    }
+  },
+  {
+    _id: ObjectId("6518050f38016f58422b93ac"),
+    id: 9,
+    url: 'http://www.tvmaze.com/shows/9/revenge',
+    name: 'Revenge',
+    type: 'Scripted',
+    language: 'English',
+    genres: [ 'Drama', 'Thriller', 'Mystery' ],
+    status: 'Ended',
+    runtime: 60,
+    premiered: '2011-09-21',
+    officialSite: null,
+    schedule: { time: '22:00', days: [ 'Sunday' ] },
+    rating: { average: 8 },
+    weight: 87,
+    network: {
+      id: 3,
+      name: 'ABC',
+      country: {
+        name: 'United States',
+        code: 'US',
+        timezone: 'America/New_York'
+      }
+    },
+    webChannel: null,
+    externals: { tvrage: 28387, thetvdb: 248837, imdb: 'tt1837642' },
+    image: {
+      medium: 'http://static.tvmaze.com/uploads/images/medium_portrait/82/206879.jpg',
+      original: 'http://static.tvmaze.com/uploads/images/original_untouched/82/206879.jpg'
+    },
+    summary: '<p>This is not a story about forgiveness; <b>Revenge</b> is a show about retribution. Meet Emily Thorne, the newest resident of The Hamptons. When she was a little girl (and known as Amanda Clarke) her father, David Clarke, was framed for a horrific crime and subsequently sent to prison. While serving his time, the conspirators plotted and murdered David in order to prevent the truth from coming out. Emily is now back with a new identity and ready to take vengeance on the people that murdered her father and stole her childhood.</p>',
+    updated: 1535975199,
+    _links: {
+      self: { href: 'http://api.tvmaze.com/shows/9' },
+      previousepisode: { href: 'http://api.tvmaze.com/episodes/154117' }
+    }
+  }
+]
+
+
+// Projection
+
+
+moviesdb> db.movies.find({},{name:1,runtime:1, rating:1, genres:1})
+[   weight: 87,
+  { network: {
+    _id: ObjectId("6518050f38016f58422b93a4"),
+    name: 'Under the Dome',
+    genres: [ 'Drama', 'Science-Fiction', 'Thriller' ],
+    runtime: 60,nited States',
+    rating: { average: 6.5 }
+  },    timezone: 'America/New_York'
+  {   }
+    _id: ObjectId("6518050f38016f58422b93a5"),
+    name: 'Person of Interest',
+    genres: [ 'Drama', 'Action', 'Crime' ],8837, imdb: 'tt1837642' },
+    runtime: 60,
+    rating: { average: 9 }ic.tvmaze.com/uploads/images/medium_portrait/82/206879.jpg',
+  },  original: 'http://static.tvmaze.com/uploads/images/original_untouched/82/206879.jpg'
+  { },
+    _id: ObjectId("6518050f38016f58422b93a6"),giveness; <b>Revenge</b> is a show about retribution. Meet Emily Thorne, the newest resident of The Hamptons. When she was a little girl (and known as Amanda Clarke) her father, David Clarke,
+    name: 'Bitten',orrific crime and subsequently sent to prison. While serving his time, the conspirators plotted and murdered David in order to prevent the truth from coming out. Emily is now back with a new identity and ready to take
+    genres: [ 'Drama', 'Horror', 'Romance' ],her and stole her childhood.</p>',
+    runtime: 60,5975199,
+    rating: { average: 7.6 }
+  },  self: { href: 'http://api.tvmaze.com/shows/9' },
+  {   previousepisode: { href: 'http://api.tvmaze.com/episodes/154117' }
+    _id: ObjectId("6518050f38016f58422b93a7"),
+    name: 'Arrow',
+    genres: [ 'Drama', 'Action', 'Science-Fiction' ],
+    runtime: 60,
+    rating: { average: 7.6 }
+  },
+  {
+    _id: ObjectId("6518050f38016f58422b93a8"),
+    name: 'True Detective',
+    genres: [ 'Drama', 'Crime', 'Thriller' ],
+    runtime: 60,
+    rating: { average: 8.3 }
+  },
+  {
+    _id: ObjectId("6518050f38016f58422b93a9"),
+    name: 'The 100',
+    genres: [ 'Action', 'Adventure', 'Science-Fiction' ],
+    runtime: 60,
+    rating: { average: 7.9 }
+  },
+  {
+    _id: ObjectId("6518050f38016f58422b93aa"),
+    name: 'Homeland',
+    genres: [ 'Drama', 'Thriller', 'Espionage' ],
+    runtime: 60,
+    rating: { average: 8.3 }
+  },
+  {
+    _id: ObjectId("6518050f38016f58422b93ab"),
+    name: 'Glee',
+    genres: [ 'Drama', 'Music', 'Romance' ],
+    runtime: 60,
+    rating: { average: 6.7 }
+  },
+  {
+    _id: ObjectId("6518050f38016f58422b93b7"),
+    name: 'The Last Ship',
+    genres: [ 'Drama', 'Action', 'Thriller' ],
+    runtime: 60,
+    rating: { average: 7.8 }
+  }
+]
+Type "it" for more
+moviesdb> db.movies.find({},{name:1,runtime:1, rating:1, genres:1,_id:0})
+[
+  {
+    name: 'Under the Dome',
+    genres: [ 'Drama', 'Science-Fiction', 'Thriller' ],
+    runtime: 60,
+    rating: { average: 6.5 }
+  },
+  {
+    name: 'Person of Interest',
+    genres: [ 'Drama', 'Action', 'Crime' ],
+    runtime: 60,
+    rating: { average: 9 }
+  },
+  {
+    name: 'Bitten',
+    genres: [ 'Drama', 'Horror', 'Romance' ],
+    runtime: 60,
+    rating: { average: 7.6 }
+  },
+  {
+    name: 'Arrow',
+    genres: [ 'Drama', 'Action', 'Science-Fiction' ],
+    runtime: 60,
+    rating: { average: 7.6 }
+  },
+  {
+    name: 'True Detective',
+    genres: [ 'Drama', 'Crime', 'Thriller' ],
+    runtime: 60,
+    rating: { average: 8.3 }
+  },
+  {
+    name: 'The 100',
+    genres: [ 'Action', 'Adventure', 'Science-Fiction' ],
+    runtime: 60,
+    rating: { average: 7.9 }
+  },
+  {
+    name: 'Homeland',
+    genres: [ 'Drama', 'Thriller', 'Espionage' ],
+    runtime: 60,
+    rating: { average: 8.3 }
+  },
+  {
+    name: 'Glee',
+    genres: [ 'Drama', 'Music', 'Romance' ],
+    runtime: 60,
+    rating: { average: 6.7 }
+  },
+  {
+    name: 'Revenge',
+    genres: [ 'Drama', 'Thriller', 'Mystery' ],
+    runtime: 60,
+    rating: { average: 8 }
+  },
+  {
+    name: 'Grimm',
+    genres: [ 'Drama', 'Crime', 'Supernatural' ],
+    runtime: 60,
+    rating: { average: 8.5 }
+  },
+  {
+    name: 'The Last Ship',
+    genres: [ 'Drama', 'Action', 'Thriller' ],
+    runtime: 60,
+    rating: { average: 7.8 }
+  }
+]
+Type "it" for more
+moviesdb> db.movies.find({},{name:1,runtime:1, rating:1, genres:1,_id:0, "schedule.time":1})
+[
+  {
+    name: 'Under the Dome',
+    genres: [ 'Drama', 'Science-Fiction', 'Thriller' ],
+    runtime: 60,
+    schedule: { time: '22:00' },
+    rating: { average: 6.5 }
+  },
+  {
+    name: 'Person of Interest',
+    genres: [ 'Drama', 'Action', 'Crime' ],
+    runtime: 60,
+    schedule: { time: '22:00' },
+    rating: { average: 9 }
+  },
+  {
+    name: 'Bitten',
+    genres: [ 'Drama', 'Horror', 'Romance' ],
+    runtime: 60,
+    schedule: { time: '22:00' },
+    rating: { average: 7.6 }
+  },
+  {
+    name: 'Arrow',
+    genres: [ 'Drama', 'Action', 'Science-Fiction' ],
+    runtime: 60,
+    schedule: { time: '20:00' },
+    rating: { average: 7.6 }
+  },
+  {
+    name: 'True Detective',
+    genres: [ 'Drama', 'Crime', 'Thriller' ],
+    runtime: 60,
+    schedule: { time: '21:00' },
+    rating: { average: 8.3 }
+  },
+  {
+    name: 'The 100',
+    genres: [ 'Action', 'Adventure', 'Science-Fiction' ],
+    runtime: 60,
+    schedule: { time: '20:00' },
+    rating: { average: 7.9 }
+  },
+  {
+    name: 'Homeland',
+    genres: [ 'Drama', 'Thriller', 'Espionage' ],
+    runtime: 60,
+    schedule: { time: '21:00' },
+    rating: { average: 8.3 }
+  }
+
+]
+Type "it" for more
+
+
+// Projection in array
+
+find the elemt with the match
+moviesdb> db.movies.find({genres:"Drama"}, {"genres.$":1})
+[
+  { _id: ObjectId("6518050f38016f58422b93a4"), genres: [ 'Drama' ] },
+  { _id: ObjectId("6518050f38016f58422b93a5"), genres: [ 'Drama' ] },
+  { _id: ObjectId("6518050f38016f58422b93a6"), genres: [ 'Drama' ] },
+  { _id: ObjectId("6518050f38016f58422b93a7"), genres: [ 'Drama' ] },
+  { _id: ObjectId("6518050f38016f58422b93a8"), genres: [ 'Drama' ] },
+  { _id: ObjectId("6518050f38016f58422b93aa"), genres: [ 'Drama' ] },
+  { _id: ObjectId("6518050f38016f58422b93ab"), genres: [ 'Drama' ] },
+  { _id: ObjectId("6518050f38016f58422b93ac"), genres: [ 'Drama' ] },
+  { _id: ObjectId("6518050f38016f58422b93ad"), genres: [ 'Drama' ] },
+  { _id: ObjectId("6518050f38016f58422b93ae"), genres: [ 'Drama' ] },
+  { _id: ObjectId("6518050f38016f58422b93af"), genres: [ 'Drama' ] },
+  { _id: ObjectId("6518050f38016f58422b93b0"), genres: [ 'Drama' ] },
+  { _id: ObjectId("6518050f38016f58422b93b1"), genres: [ 'Drama' ] },
+  { _id: ObjectId("6518050f38016f58422b93b2"), genres: [ 'Drama' ] },
+  { _id: ObjectId("6518050f38016f58422b93b3"), genres: [ 'Drama' ] },
+  { _id: ObjectId("6518050f38016f58422b93b5"), genres: [ 'Drama' ] },
+  { _id: ObjectId("6518050f38016f58422b93b6"), genres: [ 'Drama' ] },
+  { _id: ObjectId("6518050f38016f58422b93b7"), genres: [ 'Drama' ] },
+  { _id: ObjectId("6518050f38016f58422b93b8"), genres: [ 'Drama' ] },
+  { _id: ObjectId("6518050f38016f58422b93ba"), genres: [ 'Drama' ] }
+]
+Type "it" for more
+// find array with horror and drama and as fisrt match is horro it show horrow
+
+
+moviesdb> db.movies.find({genres:{$all:["Drama","Horror"]}}, {"genres.$":1})
+[
+  { _id: ObjectId("6518050f38016f58422b93a6"), genres: [ 'Horror' ] },
+  { _id: ObjectId("6518050f38016f58422b93af"), genres: [ 'Horror' ] },
+  { _id: ObjectId("6518050f38016f58422b93b2"), genres: [ 'Horror' ] },
+  { _id: ObjectId("6518050f38016f58422b93b3"), genres: [ 'Horror' ] },
+  { _id: ObjectId("6518050f38016f58422b93b6"), genres: [ 'Horror' ] },
+moviesdb>
+  { _id: ObjectId("6518050f38016f58422b93c0"), genres: [ 'Horror' ] },
+  { _id: ObjectId("6518050f38016f58422b93c3"), genres: [ 'Horror' ] },
+  { _id: ObjectId("6518050f38016f58422b93ea"), genres: [ 'Horror' ] },
+  { _id: ObjectId("6518050f38016f58422b9437"), genres: [ 'Horror' ] },
+  { _id: ObjectId("6518050f38016f58422b943e"), genres: [ 'Horror' ] },
+  { _id: ObjectId("6518050f38016f58422b945d"), genres: [ 'Horror' ] },
+  { _id: ObjectId("6518050f38016f58422b945e"), genres: [ 'Horror' ] },
+  { _id: ObjectId("6518050f38016f58422b9460"), genres: [ 'Horror' ] },
+  { _id: ObjectId("6518050f38016f58422b9475"), genres: [ 'Horror' ] },
+  { _id: ObjectId("6518050f38016f58422b947b"), genres: [ 'Horror' ] },
+  { _id: ObjectId("6518050f38016f58422b9482"), genres: [ 'Horror' ] }
+]
+
+
+// find array with drama but project which has horrow
+moviesdb> db.movies.find({genres:{$all:["Drama"]}}, {"genres":{$elemMatch:{$eq:"Horror"}}})
+[
+  { _id: ObjectId("6518050f38016f58422b93a4") },
+  { _id: ObjectId("6518050f38016f58422b93a5") },
+  { _id: ObjectId("6518050f38016f58422b93a6"), genres: [ 'Horror' ] },
+  { _id: ObjectId("6518050f38016f58422b93a7") },
+  { _id: ObjectId("6518050f38016f58422b93a8") },
+  { _id: ObjectId("6518050f38016f58422b93aa") },
+  { _id: ObjectId("6518050f38016f58422b93ab") },
+  { _id: ObjectId("6518050f38016f58422b93ac") },
+  { _id: ObjectId("6518050f38016f58422b93ad") },
+  { _id: ObjectId("6518050f38016f58422b93ae") },
+  { _id: ObjectId("6518050f38016f58422b93af"), genres: [ 'Horror' ] },
+  { _id: ObjectId("6518050f38016f58422b93b0") },
+  { _id: ObjectId("6518050f38016f58422b93b1") },
+  { _id: ObjectId("6518050f38016f58422b93b2"), genres: [ 'Horror' ] },
+  { _id: ObjectId("6518050f38016f58422b93b3"), genres: [ 'Horror' ] },
+  { _id: ObjectId("6518050f38016f58422b93b5") },
+  { _id: ObjectId("6518050f38016f58422b93b6"), genres: [ 'Horror' ] },
+  { _id: ObjectId("6518050f38016f58422b93b7") },
+  { _id: ObjectId("6518050f38016f58422b93b8") },
+  { _id: ObjectId("6518050f38016f58422b93ba") }
+]
+
+
+
+// slice will get first 2 element in array
+
+
+moviesdb> db.movies.find({genres:"Drama"}, {genres:{$slice:2}, name:1, _id:0})
+[
+  { name: 'Under the Dome', genres: [ 'Drama', 'Science-Fiction' ] },
+  { name: 'Person of Interest', genres: [ 'Drama', 'Action' ] },
+  { name: 'Bitten', genres: [ 'Drama', 'Horror' ] },
+  { name: 'Arrow', genres: [ 'Drama', 'Action' ] },
+  { name: 'True Detective', genres: [ 'Drama', 'Crime' ] },
+  { name: 'Homeland', genres: [ 'Drama', 'Thriller' ] },
+  { name: 'Glee', genres: [ 'Drama', 'Music' ] },
+  { name: 'Revenge', genres: [ 'Drama', 'Thriller' ] },
+  { name: 'Grimm', genres: [ 'Drama', 'Crime' ] },
+  { name: 'Gotham', genres: [ 'Drama', 'Action' ] },
+  { name: 'Lost Girl', genres: [ 'Drama', 'Fantasy' ] },
+  { name: 'The Flash', genres: [ 'Drama', 'Action' ] },
+  { name: 'Continuum', genres: [ 'Drama', 'Crime' ] },
+  { name: 'Constantine', genres: [ 'Drama', 'Action' ] },
+  { name: 'Penny Dreadful', genres: [ 'Drama', 'Horror' ] },
+  { name: 'Supernatural', genres: [ 'Drama', 'Action' ] },
+  { name: 'The Strain', genres: [ 'Drama', 'Horror' ] },
+  { name: 'The Last Ship', genres: [ 'Drama', 'Action' ] },
+  { name: 'True Blood', genres: [ 'Drama', 'Romance' ] },
+  { name: 'Hawaii Five-0', genres: [ 'Drama', 'Action' ] }
+]
+Type "it" for more
+
+// slice will skip first element and get next 2 element in array
+moviesdb> db.movies.find({genres:"Drama"}, {genres:{$slice:[1,2]}, name:1, _id:0})
+[
+  { name: 'Under the Dome', genres: [ 'Science-Fiction', 'Thriller' ] },
+  { name: 'Person of Interest', genres: [ 'Action', 'Crime' ] },
+  { name: 'Bitten', genres: [ 'Horror', 'Romance' ] },
+  { name: 'Arrow', genres: [ 'Action', 'Science-Fiction' ] },
+  { name: 'True Detective', genres: [ 'Crime', 'Thriller' ] },
+  { name: 'Homeland', genres: [ 'Thriller', 'Espionage' ] },
+  { name: 'Glee', genres: [ 'Music', 'Romance' ] },
+  { name: 'Revenge', genres: [ 'Thriller', 'Mystery' ] },
+  { name: 'Grimm', genres: [ 'Crime', 'Supernatural' ] },
+  { name: 'Gotham', genres: [ 'Action', 'Crime' ] },
+  { name: 'Lost Girl', genres: [ 'Fantasy', 'Horror' ] },
+  { name: 'The Flash', genres: [ 'Action', 'Science-Fiction' ] },
+  { name: 'Continuum', genres: [ 'Crime', 'Science-Fiction' ] },
+  { name: 'Constantine', genres: [ 'Action', 'Horror' ] },
+  { name: 'Penny Dreadful', genres: [ 'Horror', 'Thriller' ] },
+  { name: 'Supernatural', genres: [ 'Action', 'Supernatural' ] },
+  { name: 'The Strain', genres: [ 'Horror', 'Thriller' ] },
+  { name: 'The Last Ship', genres: [ 'Action', 'Thriller' ] },
+  { name: 'True Blood', genres: [ 'Romance', 'Supernatural' ] },
+  { name: 'Hawaii Five-0', genres: [ 'Action', 'Crime' ] }
+]
+Type "it" for more
+
+// Update 
+
+myuser> use myusers
+switched to db myusers
+myusers> show collections
+users
+myusers> db.users.find()
+[
+  {
+    _id: ObjectId("651922351bc20cd167cf82b8"),
+    name: 'Max',
+    hobbies: [
+      { title: 'Sports', frequency: 3 },
+      { title: 'Cooking', frequency: 6 }
+    ],
+    phone: 131782734
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82b9"),
+    name: 'Manuel',
+    hobbies: [
+      { title: 'Cooking', frequency: 5 },
+      { title: 'Cars', frequency: 2 }
+    ],
+    phone: '012177972',
+    age: 30
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82ba"),
+    name: 'Anna',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Yoga', frequency: 3 }
+    ],
+    phone: '80811987291',
+    age: null
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82bb"),
+    name: 'Chris',
+    hobbies: [ 'Sports', 'Cooking', 'Hiking' ]
+  }
+]
+myusers> db.users.find({_id: ObjectId("651922351bc20cd167cf82bb")})
+[
+  {
+    _id: ObjectId("651922351bc20cd167cf82bb"),
+    name: 'Chris',
+    hobbies: [ 'Sports', 'Cooking', 'Hiking' ]
+  }
+]
+
+// Update One
+myusers> db.users.updateOne({_id: ObjectId("651922351bc20cd167cf82bb")}, {$set:{hobbies:[{title:"Sports", frequency:2},{title:"Cooking",frequency:6},{title:"Hiking", frequency:3}]}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+myusers> db.users.find()
+[
+  {
+    _id: ObjectId("651922351bc20cd167cf82b8"),
+    name: 'Max',
+    hobbies: [
+      { title: 'Sports', frequency: 3 },
+      { title: 'Cooking', frequency: 6 }
+    ],
+    phone: 131782734
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82b9"),
+    name: 'Manuel',
+    hobbies: [
+      { title: 'Cooking', frequency: 5 },
+      { title: 'Cars', frequency: 2 }
+    ],
+    phone: '012177972',
+    age: 30
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82ba"),
+    name: 'Anna',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Yoga', frequency: 3 }
+    ],
+    phone: '80811987291',
+    age: null
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82bb"),
+    name: 'Chris',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Cooking', frequency: 6 },
+      { title: 'Hiking', frequency: 3 }
+    ]
+  }
+]
+
+
+
+Update Many
+
+myusers> db.users.find({"hobbies.title":"Sports"})
+[
+  {
+    _id: ObjectId("651922351bc20cd167cf82b8"),
+    name: 'Max',
+    hobbies: [
+      { title: 'Sports', frequency: 3 },
+      { title: 'Cooking', frequency: 6 }
+    ],
+    phone: 131782734
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82ba"),
+    name: 'Anna',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Yoga', frequency: 3 }
+    ],
+    phone: '80811987291',
+    age: null
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82bb"),
+    name: 'Chris',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Cooking', frequency: 6 },
+      { title: 'Hiking', frequency: 3 }
+    ]
+  }
+]
+myusers> db.users.updateMany({"hobbies.title":"Sports"},{$set:{isSporty:true}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 3,
+  modifiedCount: 3,
+  upsertedCount: 0
+}
+myusers> db.users.find()
+[
+  {
+    _id: ObjectId("651922351bc20cd167cf82b8"),
+    name: 'Max',
+    hobbies: [
+      { title: 'Sports', frequency: 3 },
+      { title: 'Cooking', frequency: 6 }
+    ],
+    phone: 131782734,
+    isSporty: true
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82b9"),
+    name: 'Manuel',
+    hobbies: [
+      { title: 'Cooking', frequency: 5 },
+      { title: 'Cars', frequency: 2 }
+    ],
+    phone: '012177972',
+    age: 30
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82ba"),
+    name: 'Anna',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Yoga', frequency: 3 }
+    ],
+    phone: '80811987291',
+    age: null,
+    isSporty: true
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82bb"),
+    name: 'Chris',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Cooking', frequency: 6 },
+      { title: 'Hiking', frequency: 3 }
+    ],
+    isSporty: true
+  }
+]
+
+
+// update multi field
+
+myusers> db.users.updateOne({_id: ObjectId("651922351bc20cd167cf82bb")},{$set:{age:40, phone: 657437657357}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+myusers> db.users.find()
+[
+  {
+    _id: ObjectId("651922351bc20cd167cf82b8"),
+    name: 'Max',
+    hobbies: [
+      { title: 'Sports', frequency: 3 },
+      { title: 'Cooking', frequency: 6 }
+    ],
+    phone: 131782734,
+    isSporty: true
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82b9"),
+    name: 'Manuel',
+    hobbies: [
+      { title: 'Cooking', frequency: 5 },
+      { title: 'Cars', frequency: 2 }
+    ],
+    phone: '012177972',
+    age: 30
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82ba"),
+    name: 'Anna',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Yoga', frequency: 3 }
+    ],
+    phone: '80811987291',
+    age: null,
+    isSporty: true
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82bb"),
+    name: 'Chris',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Cooking', frequency: 6 },
+      { title: 'Hiking', frequency: 3 }
+    ],
+    isSporty: true,
+    age: 40,
+    phone: 657437657357
+  }
+]
+
+
+// inc and dec
+
+myusers> db.users.updateOne({name:"Manuel"},{$inc:{age:1}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+myusers> db.users.find({name:"Manual"})
+
+myusers> db.users.find({name:"Manuel"})
+[
+  {
+    _id: ObjectId("651922351bc20cd167cf82b9"),
+    name: 'Manuel',
+    hobbies: [
+      { title: 'Cooking', frequency: 5 },
+      { title: 'Cars', frequency: 2 }
+    ],
+    phone: '012177972',
+    age: 31
+  }
+]
+myusers> db.users.updateOne({name:"Manuel"},{$inc:{age:-2}, $set:{isSporty:false}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+myusers> db.users.find({name:"Manuel"})
+[
+  {
+    _id: ObjectId("651922351bc20cd167cf82b9"),
+    name: 'Manuel',
+    hobbies: [
+      { title: 'Cooking', frequency: 5 },
+      { title: 'Cars', frequency: 2 }
+    ],
+    phone: '012177972',
+    age: 29,
+    isSporty: false
+  }
+]
+
+
+// $ min , set min value from provided vs current
+
+
+myusers> db.users.updateOne({name:"Chris"},{$min:{age:35}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+myusers> db.users.find({name:"Chris"})
+[
+  {
+    _id: ObjectId("651922351bc20cd167cf82bb"),
+    name: 'Chris',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Cooking', frequency: 6 },
+      { title: 'Hiking', frequency: 3 }
+    ],
+    isSporty: true,
+    age: 35,
+    phone: 657437657357
+  }
+]
+myusers> db.users.updateOne({name:"Chris"},{$min:{age:45}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 0,
+  upsertedCount: 0
+}
+myusers> db.users.find({name:"Chris"})
+[
+  {
+    _id: ObjectId("651922351bc20cd167cf82bb"),
+    name: 'Chris',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Cooking', frequency: 6 },
+      { title: 'Hiking', frequency: 3 }
+    ],
+    isSporty: true,
+    age: 35,
+    phone: 657437657357
+  }
+]
+// $ max , set max value from provided vs current
+
+myusers> db.users.updateOne({name:"Chris"},{$max:{age:45}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+myusers> db.users.find({name:"Chris"})
+[
+  {
+    _id: ObjectId("651922351bc20cd167cf82bb"),
+    name: 'Chris',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Cooking', frequency: 6 },
+      { title: 'Hiking', frequency: 3 }
+    ],
+    isSporty: true,
+    age: 45,
+    phone: 657437657357
+  }
+]
+myusers> db.users.updateOne({name:"Chris"},{$max:{age:35}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 0,
+  upsertedCount: 0
+}
+myusers> db.users.find({name:"Chris"})
+[
+  {
+    _id: ObjectId("651922351bc20cd167cf82bb"),
+    name: 'Chris',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Cooking', frequency: 6 },
+      { title: 'Hiking', frequency: 3 }
+    ],
+    isSporty: true,
+    age: 45,
+    phone: 657437657357
+  }
+]
+
+// $ mul , multiple current value (example like price)
+
+myusers> db.users.updateOne({name:"Chris"},{$mul:{age:1.2}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+myusers> db.users.find({name:"Chris"})
+[
+  {
+    _id: ObjectId("651922351bc20cd167cf82bb"),
+    name: 'Chris',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Cooking', frequency: 6 },
+      { title: 'Hiking', frequency: 3 }
+    ],
+    isSporty: true,
+    age: 54,
+    phone: 657437657357
+  }
+]
+
+
+// Updating to null 
+
+myusers> db.users.updateMany({isSporty:true},{$set:{phone:null}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 3,
+  modifiedCount: 0,
+  upsertedCount: 0
+}
+myusers> db.users.find({isSporty:true})
+[
+  {
+    _id: ObjectId("651922351bc20cd167cf82b8"),
+    name: 'Max',
+    hobbies: [
+      { title: 'Sports', frequency: 3 },
+      { title: 'Cooking', frequency: 6 }
+    ],
+    phone: null,
+    isSporty: true
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82ba"),
+    name: 'Anna',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Yoga', frequency: 3 }
+    ],
+    phone: null,
+    age: null,
+    isSporty: true
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82bb"),
+    name: 'Chris',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Cooking', frequency: 6 },
+      { title: 'Hiking', frequency: 3 }
+    ],
+    isSporty: true,
+    age: 54,
+    phone: null
+  }
+]
+
+$unset removing field from document
+
+myusers> db.users.updateMany({isSporty:true},{$unset:{phone:""}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 3,
+  modifiedCount: 3,
+  upsertedCount: 0
+}
+myusers> db.users.find({isSporty:true})
+[
+  {
+    _id: ObjectId("651922351bc20cd167cf82b8"),
+    name: 'Max',
+    hobbies: [
+      { title: 'Sports', frequency: 3 },
+      { title: 'Cooking', frequency: 6 }
+    ],
+    isSporty: true
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82ba"),
+    name: 'Anna',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Yoga', frequency: 3 }
+    ],
+    age: null,
+    isSporty: true
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82bb"),
+    name: 'Chris',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Cooking', frequency: 6 },
+      { title: 'Hiking', frequency: 3 }
+    ],
+    isSporty: true,
+    age: 54
+  }
+]
+ 
+// Rename Field 
+
+myusers> db.users.updateMany({},{$rename:{age:"totalAge"}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 4,
+  modifiedCount: 3,
+  upsertedCount: 0
+}
+myusers> db.users.find({})
+[
+  {
+    _id: ObjectId("651922351bc20cd167cf82b8"),
+    name: 'Max',
+    hobbies: [
+      { title: 'Sports', frequency: 3 },
+      { title: 'Cooking', frequency: 6 }
+    ],
+    isSporty: true
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82b9"),
+    name: 'Manuel',
+    hobbies: [
+      { title: 'Cooking', frequency: 5 },
+      { title: 'Cars', frequency: 2 }
+    ],
+    phone: '012177972',
+    isSporty: false,
+    totalAge: 29
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82ba"),
+    name: 'Anna',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Yoga', frequency: 3 }
+    ],
+    isSporty: true,
+    totalAge: null
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82bb"),
+    name: 'Chris',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Cooking', frequency: 6 },
+      { title: 'Hiking', frequency: 3 }
+    ],
+    isSporty: true,
+    totalAge: 54
+  }
+]
+
+// Upsert
+
+myusers> db.users.updateOne({name:"upsert"},{$set:{hobbies:[{"title":"Coooking", frequency:2}], isSporty:false, totalAge:30, phone:87666786}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 0,
+  modifiedCount: 0,
+  upsertedCount: 0
+}
+myusers> db.users.updateOne({name:"upsert"},{$set:{hobbies:[{"title":"Coooking", frequency:2}], isSporty:false, totalAge:30, phone:87666786}}, {upsert:true})
+{
+  acknowledged: true,
+  insertedId: ObjectId("65193adc9d3b6e15c0e61efb"),
+  matchedCount: 0,
+  modifiedCount: 0,
+  upsertedCount: 1
+}
+myusers> db.users.find({})
+[
+  {
+    _id: ObjectId("651922351bc20cd167cf82b8"),
+    name: 'Max',
+    hobbies: [
+      { title: 'Sports', frequency: 3 },
+      { title: 'Cooking', frequency: 6 }
+    ],
+    isSporty: true
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82b9"),
+    name: 'Manuel',
+    hobbies: [
+      { title: 'Cooking', frequency: 5 },
+      { title: 'Cars', frequency: 2 }
+    ],
+    phone: '012177972',
+    isSporty: false,
+    totalAge: 29
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82ba"),
+    name: 'Anna',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Yoga', frequency: 3 }
+    ],
+    isSporty: true,
+    totalAge: null
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82bb"),
+    name: 'Chris',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Cooking', frequency: 6 },
+      { title: 'Hiking', frequency: 3 }
+    ],
+    isSporty: true,
+    totalAge: 54
+  },
+  {
+    _id: ObjectId("65193adc9d3b6e15c0e61efb"),
+    name: 'upsert',
+    hobbies: [ { title: 'Coooking', frequency: 2 } ],
+    isSporty: false,
+    phone: 87666786,
+    totalAge: 30
+  }
+]
+
+
+
+// Updaing Specific element of match array : first element
+myusers> db.users.find({$and:[{"hobbies.title":"Sports"}, {"hobbies.frequency":{$gte:3}}]})
+[
+  {
+    _id: ObjectId("651922351bc20cd167cf82b8"),
+    name: 'Max',
+    hobbies: [
+      { title: 'Sports', frequency: 3 },
+      { title: 'Cooking', frequency: 6 }
+    ],
+    isSporty: true
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82ba"),
+    name: 'Anna',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Yoga', frequency: 3 }
+    ],
+    isSporty: true,
+    totalAge: null
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82bb"),
+    name: 'Chris',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Cooking', frequency: 6 },
+      { title: 'Hiking', frequency: 3 }
+    ],
+    isSporty: true,
+    totalAge: 54
+  }
+]
+
+
+
+myusers> db.users.find({hobbies:{$elemMatch:{title:"Sports", frequency:{$gte:3}}}})
+[
+  {
+    _id: ObjectId("651922351bc20cd167cf82b8"),
+    name: 'Max',
+    hobbies: [
+      { title: 'Sports', frequency: 3 },
+      { title: 'Cooking', frequency: 6 }
+    ],
+    isSporty: true
+  }
+]
+myusers> db.users.updateMany({hobbies:{$elemMatch:{title:"Sports", frequency:{$gte:3}}}}, {$set:{"hobbies.$.highFrequency":true}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+myusers> db.users.find({})
+[
+  {
+    _id: ObjectId("651922351bc20cd167cf82b8"),
+    name: 'Max',
+    hobbies: [
+      { title: 'Sports', frequency: 3, highFrequency: true },
+      { title: 'Cooking', frequency: 6 }
+    ],
+    isSporty: true
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82b9"),
+    name: 'Manuel',
+    hobbies: [
+      { title: 'Cooking', frequency: 5 },
+      { title: 'Cars', frequency: 2 }
+    ],
+    phone: '012177972',
+    isSporty: false,
+    totalAge: 29
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82ba"),
+    name: 'Anna',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Yoga', frequency: 3 }
+    ],
+    isSporty: true,
+    totalAge: null
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82bb"),
+    name: 'Chris',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Cooking', frequency: 6 },
+      { title: 'Hiking', frequency: 3 }
+    ],
+    isSporty: true,
+    totalAge: 54
+  },
+  {
+    _id: ObjectId("65193adc9d3b6e15c0e61efb"),
+    name: 'upsert',
+    hobbies: [ { title: 'Coooking', frequency: 2 } ],
+    isSporty: false,
+    phone: 87666786,
+    totalAge: 30
+  }
+]
+
+// Updaing Specific element of match array : all element
+myusers> db.users.updateMany({"hobbies.frequency":{$gt:2}}, {$set:{"hobbies.$.frequency":true}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 4,
+  modifiedCount: 4,
+  upsertedCount: 0
+}
+myusers> db.users.updateMany({totalAge:{$gt:30}}, {$inc:{"hobbies.$[].frequency":-1}})
+
+
+// updating specific fields
+
+myusers> db.users.updateMany({"hobbies.frequency":{$gt:2}}, {$set:{"hobbies.$[el].goodFrequency":true}}, {arrayFilters:[{"el.frequency":{$gt:2}}]})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 2,
+  modifiedCount: 2,
+  upsertedCount: 0
+}
+
+
+//Adding element to array
+
+myusers> db.users.find({name:"upsert"})
+[
+  {
+    _id: ObjectId("65193adc9d3b6e15c0e61efb"),
+    name: 'upsert',
+    hobbies: [ { title: 'Coooking', frequency: 2 } ],
+    isSporty: false,
+    phone: 87666786,
+    totalAge: 30
+  }
+]
+myusers> db.users.updateOne({name:"upsert"},{$push:{hobbies:{title:"Sports", frequency:2}}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+myusers> db.users.find({name:"upsert"})
+[
+  {
+    _id: ObjectId("65193adc9d3b6e15c0e61efb"),
+    name: 'upsert',
+    hobbies: [
+      { title: 'Coooking', frequency: 2 },
+      { title: 'Sports', frequency: 2 }
+    ],
+    isSporty: false,
+    phone: 87666786,
+    totalAge: 30
+  }
+]
+myusers> db.users.updateOne({name:"upsert"},{$push:{hobbies:{$each:[{title:"Good", frequency:2}, {title:"Hiking", frequency:2}], $sort:{frequency:1}}}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+myusers> db.users.find({name:"upsert"})
+[
+  {
+    _id: ObjectId("65193adc9d3b6e15c0e61efb"),
+    name: 'upsert',
+    hobbies: [
+      { title: 'Coooking', frequency: 2 },
+      { title: 'Sports', frequency: 2 },
+      { title: 'Good', frequency: 2 },
+      { title: 'Hiking', frequency: 2 }
+    ],
+    isSporty: false,
+    phone: 87666786,
+    totalAge: 30
+  }
+]
+myusers> db.users.updateOne({name:"upsert"},{$push:{hobbies:{$each:[{title:"Good1", frequency:2}, {title:"Hiking1", frequency:2}], $sort:{frequency:1}, $slice:1}}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+myusers> db.users.find({name:"upsert"})
+[
+  {
+    _id: ObjectId("65193adc9d3b6e15c0e61efb"),
+    name: 'upsert',
+    hobbies: [ { title: 'Coooking', frequency: 2 } ],
+    isSporty: false,
+    phone: 87666786,
+    totalAge: 30
+  }
+]
+myusers> db.users.updateOne({name:"upsert"},{$push:{hobbies:{$each:[{title:"Good", frequency:2}, {title:"Hiking", frequency:2}], $sort:{frequency:1}}}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+myusers> db.users.find({name:"upsert"})
+[
+  {
+    _id: ObjectId("65193adc9d3b6e15c0e61efb"),
+    name: 'upsert',
+    hobbies: [
+      { title: 'Coooking', frequency: 2 },
+      { title: 'Good', frequency: 2 },
+      { title: 'Hiking', frequency: 2 }
+    ],
+    isSporty: false,
+    phone: 87666786,
+    totalAge: 30
+  }
+]
+
+
+
+Removing element to array
+
+myusers> db.users.find({name:"upsert"})
+[
+  {
+    _id: ObjectId("65193adc9d3b6e15c0e61efb"),
+    name: 'upsert',
+    hobbies: [
+      { title: 'Coooking', frequency: 2 },
+      { title: 'Good', frequency: 2 },
+      { title: 'Hiking', frequency: 2 }
+    ],
+    isSporty: false,
+    phone: 87666786,
+    totalAge: 30
+  }
+]
+myusers> db.users.updateOne({name:"upsert"},{$pull:{hobbies:{title:"Coooking"}}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+myusers> db.users.find({name:"upsert"})
+[
+  {
+    _id: ObjectId("65193adc9d3b6e15c0e61efb"),
+    name: 'upsert',
+    hobbies: [
+      { title: 'Good', frequency: 2 },
+      { title: 'Hiking', frequency: 2 }
+    ],
+    isSporty: false,
+    phone: 87666786,
+    totalAge: 30
+  }
+]
+myusers> db.users.updateOne({name:"upsert"},{$pop:{hobbies:-1}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+myusers> db.users.find({name:"upsert"})
+[
+  {
+    _id: ObjectId("65193adc9d3b6e15c0e61efb"),
+    name: 'upsert',
+    hobbies: [ { title: 'Hiking', frequency: 2 } ],
+    isSporty: false,
+    phone: 87666786,
+    totalAge: 30
+  }
+]
+
+
+Avoiding adding duplicated item
+
+myusers> db.users.updateOne({name:"upsert"},{$addToSet:{hobbies:{title:"Sports", frequency:2}}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+myusers> db.users.find({name:"upsert"})
+[
+  {
+    _id: ObjectId("65193adc9d3b6e15c0e61efb"),
+    name: 'upsert',
+    hobbies: [
+      { title: 'Hiking', frequency: 2 },
+      { title: 'Sports', frequency: 2 }
+    ],
+    isSporty: false,
+    phone: 87666786,
+    totalAge: 30
+  }
+]
+myusers> db.users.updateOne({name:"upsert"},{$addToSet:{hobbies:{title:"Sports", frequency:2}}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 0,
+  upsertedCount: 0
+}
+myusers> db.users.find({name:"upsert"})
+[
+  {
+    _id: ObjectId("65193adc9d3b6e15c0e61efb"),
+    name: 'upsert',
+    hobbies: [
+      { title: 'Hiking', frequency: 2 },
+      { title: 'Sports', frequency: 2 }
+    ],
+    isSporty: false,
+    phone: 87666786,
+    totalAge: 30
+  }
+]
+myusers> db.users.updateOne({name:"upsert"},{$addToSet:{hobbies:{title:"Sports", frequency:3}}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+myusers> db.users.find({name:"upsert"})
+[
+  {
+    _id: ObjectId("65193adc9d3b6e15c0e61efb"),
+    name: 'upsert',
+    hobbies: [
+      { title: 'Hiking', frequency: 2 },
+      { title: 'Sports', frequency: 2 },
+      { title: 'Sports', frequency: 3 }
+    ],
+    isSporty: false,
+    phone: 87666786,
+    totalAge: 30
+  }
+]
+
+
+Delete One
+
+myusers> db.users.deleteOne({name:'Chris'})
+{ acknowledged: true, deletedCount: 1 }
+myusers> db.users.find()
+[
+  {
+    _id: ObjectId("651922351bc20cd167cf82b8"),
+    name: 'Max',
+    hobbies: [
+      { title: 'Sports', frequency: true, highFrequency: true },
+      { title: 'Cooking', frequency: 6, goodFrequency: true }
+    ],
+    isSporty: true
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82b9"),
+    name: 'Manuel',
+    hobbies: [
+      { title: 'Cooking', frequency: true },
+      { title: 'Cars', frequency: 2 }
+    ],
+    phone: '012177972',
+    isSporty: false,
+    totalAge: 29
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82ba"),
+    name: 'Anna',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Yoga', frequency: true }
+    ],
+    isSporty: true,
+    totalAge: null
+  },
+  {
+    _id: ObjectId("65193adc9d3b6e15c0e61efb"),
+    name: 'upsert',
+    hobbies: [
+      { title: 'Hiking', frequency: 2 },
+      { title: 'Sports', frequency: 2 },
+      { title: 'Sports', frequency: 3 }
+    ],
+    isSporty: false,
+    phone: 87666786,
+    totalAge: 30
+  }
+]
+
+
+//delete Many
+
+myusers> db.users.deleteMany({totalAge:{$exists:false}, isSporty:true})
+{ acknowledged: true, deletedCount: 1 }
+myusers> db.users.find()
+[
+  {
+    _id: ObjectId("651922351bc20cd167cf82b9"),
+    name: 'Manuel',
+    hobbies: [
+      { title: 'Cooking', frequency: true },
+      { title: 'Cars', frequency: 2 }
+    ],
+    phone: '012177972',
+    isSporty: false,
+    totalAge: 29
+  },
+  {
+    _id: ObjectId("651922351bc20cd167cf82ba"),
+    name: 'Anna',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Yoga', frequency: true }
+    ],
+    isSporty: true,
+    totalAge: null
+  },
+  {
+    _id: ObjectId("65193adc9d3b6e15c0e61efb"),
+    name: 'upsert',
+    hobbies: [
+      { title: 'Hiking', frequency: 2 },
+      { title: 'Sports', frequency: 2 },
+      { title: 'Sports', frequency: 3 }
+    ],
+    isSporty: false,
+    phone: 87666786,
+    totalAge: 30
+  }
+]
+
+
+// Delete all
+myusers> db.users.deleteMany({})
+{ acknowledged: true, deletedCount: 3 }
+myusers> db.users.drop()
+true
+myusers> show collections
+
+myusers> show dbs
+admin      40.00 KiB
+config     60.00 KiB
+local      72.00 KiB
+moviesdb  376.00 KiB
+testdb    432.00 KiB
+myusers>

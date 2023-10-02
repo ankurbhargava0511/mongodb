@@ -1,0 +1,667 @@
+//show dbs
+//use testdb
+
+
+// Managing Database and collections
+
+testdb> use shop
+switched to db shop
+shop> show collections
+product
+shop> db.product.drop()
+true
+shop> show collections
+
+shop> db.dropDatabase()
+shop> show dbs
+{ ok: 1, dropped: 'shop' }
+admin    40.00 KiB
+config  108.00 KiB
+local    72.00 KiB
+testdb   72.00 KiB
+shop>
+
+
+
+//adding value
+db.testdb.insertOne({ name: "Name1", age: 27 } )
+//getdata
+db.testdb.find().pretty()
+[
+  { _id: ObjectId("6517cab075752d0d39dfbc59"), name: 'Name1', age: 27 },
+  { _id: ObjectId("6517cab375752d0d39dfbc5a"), name: 'Name1', age: 27 }
+]
+//Explicite Id
+
+
+testdb> db.testdb.insertOne({_id:"id_1",name:"namewithid"})
+{ acknowledged: true, insertedId: 'id_1' }
+//update
+testdb> db.testdb.updateOne({_id:"id_1"},{$set:{newvalue:"testvalueforupdate"} })
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+testdb> db.testdb.find().pretty()
+[
+  { _id: ObjectId("6517cab075752d0d39dfbc59"), name: 'Name1', age: 27 },
+  { _id: ObjectId("6517cab375752d0d39dfbc5a"), name: 'Name1', age: 27 },
+  { _id: 'id_1', name: 'namewithid', newvalue: 'testvalueforupdate' }
+]
+
+testdb> db.testdb.insertMany([{name:"manyname"},{name:"manyname2"}])
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId("6517ce5475752d0d39dfbc5b"),
+    '1': ObjectId("6517ce5475752d0d39dfbc5c")
+  }
+}
+testdb> db.testdb.find().pretty()
+[
+  { _id: ObjectId("6517cab075752d0d39dfbc59"), name: 'Name1', age: 27 },
+  { _id: ObjectId("6517cab375752d0d39dfbc5a"), name: 'Name1', age: 27 },
+  { _id: 'id_1', name: 'namewithid', newvalue: 'testvalueforupdate' },
+  { _id: ObjectId("6517ce5475752d0d39dfbc5b"), name: 'manyname' },
+  { _id: ObjectId("6517ce5475752d0d39dfbc5c"), name: 'manyname2' }
+]
+testdb> db.testdb.updateOne({name:"manyname"}, {$set:{age:30}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+testdb> db.testdb.updateOne({name:"manyname2"}, {$set:{age:32,newvalue:"updateonevallue"}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+testdb> db.testdb.find().pretty()
+[
+  { _id: ObjectId("6517cab075752d0d39dfbc59"), name: 'Name1', age: 27 },
+  { _id: ObjectId("6517cab375752d0d39dfbc5a"), name: 'Name1', age: 27 },
+  { _id: 'id_1', name: 'namewithid', newvalue: 'testvalueforupdate' },
+  {
+    _id: ObjectId("6517ce5475752d0d39dfbc5b"),
+    name: 'manyname',
+    age: 30
+  },
+  {
+    _id: ObjectId("6517ce5475752d0d39dfbc5c"),
+    name: 'manyname2',
+    age: 32,
+    newvalue: 'updateonevallue'
+  }
+]
+
+
+testdb> db.testdb.updateMany({},{$set:{settingvalue:"wewant in all doc"}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 5,
+  modifiedCount: 5,
+  upsertedCount: 0
+}
+testdb> db.testdb.find().pretty()
+[
+  {
+    _id: ObjectId("6517cab075752d0d39dfbc59"),
+    name: 'Name1',
+    age: 27,
+    settingvalue: 'wewant in all doc'
+  },
+  {
+    _id: ObjectId("6517cab375752d0d39dfbc5a"),
+    name: 'Name1',
+    age: 27,
+    settingvalue: 'wewant in all doc'
+  },
+  {
+    _id: 'id_1',
+    name: 'namewithid',
+    newvalue: 'testvalueforupdate',
+    settingvalue: 'wewant in all doc'
+  },
+  {
+    _id: ObjectId("6517ce5475752d0d39dfbc5b"),
+    name: 'manyname',
+    age: 30,
+    settingvalue: 'wewant in all doc'
+  },
+  {
+    _id: ObjectId("6517ce5475752d0d39dfbc5c"),
+    name: 'manyname2',
+    age: 32,
+    newvalue: 'updateonevallue',
+    settingvalue: 'wewant in all doc'
+  }
+]
+
+testdb> db.testdb.find().forEach((data)=>{printjson(data)})
+{
+  _id: ObjectId("6517cab075752d0d39dfbc59"),
+  name: 'Name1',
+  age: 27,
+  settingvalue: 'wewant in all doc'
+}
+{
+  _id: ObjectId("6517cab375752d0d39dfbc5a"),
+  name: 'Name1',
+  age: 27,
+  settingvalue: 'wewant in all doc'
+}
+{
+  _id: 'id_1',
+  name: 'namewithid',
+  newvalue: 'testvalueforupdate',
+  settingvalue: 'wewant in all doc'
+}
+{
+  _id: ObjectId("6517ce5475752d0d39dfbc5b"),
+  name: 'manyname',
+  age: 30,
+  settingvalue: 'wewant in all doc'
+}
+{
+  _id: ObjectId("6517ce5475752d0d39dfbc5c"),
+  name: 'manyname2',
+  age: 32,
+  newvalue: 'updateonevallue',
+  settingvalue: 'wewant in all doc'
+}
+//Projection
+
+
+testdb> db.testdb.find({},{name:1})
+[
+  { _id: ObjectId("6517cab075752d0d39dfbc59"), name: 'Name1' },
+  { _id: ObjectId("6517cab375752d0d39dfbc5a"), name: 'Name1' },
+  { _id: 'id_1', name: 'namewithid' },
+  { _id: ObjectId("6517ce5475752d0d39dfbc5b"), name: 'manyname' },
+  { _id: ObjectId("6517ce5475752d0d39dfbc5c"), name: 'manyname2' }
+]
+testdb> db.testdb.find({},{_id:0,name:1,age:1})
+[
+  { name: 'Name1', age: 27 },
+  { name: 'Name1', age: 27 },
+  { name: 'namewithid' },
+  { name: 'manyname', age: 30 },
+  { name: 'manyname2', age: 32 }
+]
+//Document and array
+
+testdb> db.testdb.updateMany({name:"Name1"},{$set:{address:{add1:"31543451",add2:"78287652",city:"Mumbai", state:"MH"}}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 2,
+  modifiedCount: 2,
+  upsertedCount: 0
+}
+testdb> db.testdb.updateMany({name:"manyname"},{$set:{address:{add1:"31543451",add2:"78287652",city:"Delhi", state:"DL"}}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+testdb> db.testdb.updateMany({},{$set:{hobbies:["sport","cocking"]}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 5,
+  modifiedCount: 5,
+  upsertedCount: 0
+}
+testdb> db.testdb.find().pretty()
+[
+  {
+    _id: ObjectId("6517cab075752d0d39dfbc59"),
+    name: 'Name1',
+    age: 27,
+    settingvalue: 'wewant in all doc',
+    address: { add1: '31543451', add2: '78287652', city: 'Mumbai', state: 'MH' },
+    hobbies: [ 'sport', 'cocking' ]
+  },
+  {
+    _id: ObjectId("6517cab375752d0d39dfbc5a"),
+    name: 'Name1',
+    age: 27,
+    settingvalue: 'wewant in all doc',
+    address: { add1: '31543451', add2: '78287652', city: 'Mumbai', state: 'MH' },
+    hobbies: [ 'sport', 'cocking' ]
+  },
+  {
+    _id: 'id_1',
+    name: 'namewithid',
+    newvalue: 'testvalueforupdate',
+    settingvalue: 'wewant in all doc',
+    hobbies: [ 'sport', 'cocking' ]
+  },
+  {
+    _id: ObjectId("6517ce5475752d0d39dfbc5b"),
+    name: 'manyname',
+    age: 30,
+    settingvalue: 'wewant in all doc',
+    address: { add1: '31543451', add2: '78287652', city: 'Delhi', state: 'DL' },
+    hobbies: [ 'sport', 'cocking' ]
+  },
+  {
+    _id: ObjectId("6517ce5475752d0d39dfbc5c"),
+    name: 'manyname2',
+    age: 32,
+    newvalue: 'updateonevallue',
+    settingvalue: 'wewant in all doc',
+    hobbies: [ 'sport', 'cocking' ]
+  }
+]
+
+testdb> db.testdb.find({"address.city":"Delhi"})
+[
+  {
+    _id: ObjectId("6517ce5475752d0d39dfbc5b"),
+    name: 'manyname',
+    age: 30,
+    settingvalue: 'wewant in all doc',
+    address: { add1: '31543451', add2: '78287652', city: 'Delhi', state: 'DL' },
+    hobbies: [ 'sport', 'cocking' ]
+  }
+]
+
+
+testdb> db.testdb.find({name:"namewithid"})
+[
+  {
+    _id: 'id_1',
+    name: 'namewithid',
+    newvalue: 'testvalueforupdate',
+    settingvalue: 'wewant in all doc',
+    hobbies: [ 'sport', 'cocking' ]
+  }
+]
+testdb> db.testdb.find({name:"namewithid"}).hobbies // this  will not work beacuse find return an array
+
+
+testdb> db.testdb.findOne({name:"namewithid"}).hobbies
+[ 'sport', 'cocking' ]
+testdb> db.testdb.findOne({hobbies:"sport"})
+{
+  _id: ObjectId("6517cab075752d0d39dfbc59"),
+  name: 'Name1',
+  age: 27,
+  settingvalue: 'wewant in all doc',
+  address: { add1: '31543451', add2: '78287652', city: 'Mumbai', state: 'MH' },
+  hobbies: [ 'sport', 'cocking' ]
+}
+
+
+
+// Test
+db.patients.insertMany([{firstName:"name1",lastName:"lastName1",age:12,history:[{disease:"cold",treatment:"a"}]},{firstName:"name2",lastName:"lastName2",age:31,history:[{disease:"cold",treatment:"a"}]}])
+
+db.patients.find().pretty()
+
+db.patients.updateOne({age:12},{$set:{lastName:"lastName12",history:[{disease:"cold",treatment:"b"}]}})
+
+db.patients.find({age:{$gt:30}}).pretty()
+
+db.patients.deleteMany({"history.disease":"cold"})
+
+// Datatypes
+
+testdb> db.dbtypestest.insertOne({text:"mytext"})
+{
+  acknowledged: true,
+  insertedId: ObjectId("6517e9ed75752d0d39dfbc5e")
+}
+testdb> db.dbtypestest.updateOne({text:"mytext"}, {$set:{b:true}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+testdb> db.dbtypestest.updateOne({text:"mytext"}, {$set:{num:545}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+testdb> db.dbtypestest.updateOne({text:"mytext"}, {$set:{ival:NumberInt(1)}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+testdb> db.dbtypestest.updateOne({text:"mytext"}, {$set:{lval:NumberLong("78687")}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+testdb> db.dbtypestest.updateOne({text:"mytext"}, {$set:{obj:ObjectId("myobject")}})
+BSONError: Argument passed in must be a string of 12 bytes or a string of 24 hex characters or an integer
+testdb> db.dbtypestest.updateOne({text:"mytext"}, {$set:{mydate:new Date()}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+testdb> db.dbtypestest.updateOne({text:"mytext"}, {$set:{mytime:new Timestamp()}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+testdb> db.dbtypestest.updateOne({text:"mytext"}, {$set:{docs:{doc1:"something", doct2:"something more"}}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+testdb> db.dbtypestest.updateOne({text:"mytext"}, {$set:{arr:["arr1","arr2"]}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+testdb> db.dbtypestest.find().pretty()
+[
+  {
+    _id: ObjectId("6517e9ed75752d0d39dfbc5e"),
+    text: 'mytext',
+    b: true,
+    num: 545,
+    ival: 1,
+    lval: Long("78687"),
+    dval: Decimal128("765367.77"),
+    mydate: ISODate("2023-09-30T09:30:50.831Z"),
+    mytime: Timestamp({ t: 0, i: 0 }),
+    docs: { doc1: 'something', doct2: 'something more' },
+    arr: [ 'arr1', 'arr2' ]
+  }
+]
+testdb> db.dbtypestest.insertOne({ text: "mytext1", b: true, num: 545, ival: NumberInt(1), lval: NumberLong("78687"), dval: NumberDecimal("765367.77"), mydate: new Date(), mytime: new Timestamp(), docs: { doc1: "something", doct2: "something more" }, arr: ["arr1", "arr2"] })
+{
+  acknowledged: true,
+  insertedId: ObjectId("6517ecad75752d0d39dfbc61")
+}
+testdb> db.dbtypestest.find().pretty()
+[
+  {
+    _id: ObjectId("6517e9ed75752d0d39dfbc5e"),
+    text: 'mytext',
+    b: true,
+    num: 545,
+    ival: 1,
+    lval: Long("78687"),
+    dval: Decimal128("765367.77"),
+    mydate: ISODate("2023-09-30T09:30:50.831Z"),
+    mytime: Timestamp({ t: 0, i: 0 }),
+    docs: { doc1: 'something', doct2: 'something more' },
+    arr: [ 'arr1', 'arr2' ]
+  },
+  {
+    _id: ObjectId("6517ecad75752d0d39dfbc61"),
+    text: 'mytext1',
+    b: true,
+    num: 545,
+    ival: 1,
+    lval: Long("78687"),
+    dval: Decimal128("765367.77"),
+    mydate: ISODate("2023-09-30T09:38:53.596Z"),
+    mytime: Timestamp({ t: 1696066733, i: 1 }),
+    docs: { doc1: 'something', doct2: 'something more' },
+    arr: [ 'arr1', 'arr2' ]
+  }
+]
+
+
+testdb> db.stats()
+{
+  db: 'testdb',
+  collections: Long("3"),
+  views: Long("0"),
+  objects: Long("8"),
+  avgObjSize: 181.875,
+  dataSize: 1455,
+  storageSize: 110592,
+  indexes: Long("3"),
+  indexSize: 94208,
+  totalSize: 204800,
+  scaleFactor: Long("1"),
+  fsUsedSize: 80131493888,
+  fsTotalSize: 472506167296,
+  ok: 1
+}
+
+//Type of 
+
+testdb>
+testdb> typeof db.dbtypestest.findOne().text
+string
+testdb> typeof db.dbtypestest.findOne().b
+boolean
+testdb> typeof db.dbtypestest.findOne().num
+number
+testdb> typeof db.dbtypestest.findOne().ival
+number
+testdb> typeof db.dbtypestest.findOne().lval
+object
+testdb> typeof db.dbtypestest.findOne().dval
+object
+testdb> typeof db.dbtypestest.findOne().mydate
+object
+testdb> typeof db.dbtypestest.findOne().mytime
+object
+testdb> typeof db.dbtypestest.findOne().doc
+undefined
+testdb> typeof db.dbtypestest.findOne().docs
+object
+testdb> typeof db.dbtypestest.findOne().arr
+object
+
+
+
+testdb> db.testdb.updateOne({_id: ObjectId("6517cab375752d0d39dfbc5a")},{$set:{name:"name234"}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+testdb> db.testdb.find()
+[
+  {
+    _id: ObjectId("6517cab075752d0d39dfbc59"),
+    name: 'Name1',
+    age: 27,
+    settingvalue: 'wewant in all doc',
+    address: { add1: '31543451', add2: '78287652', city: 'Mumbai', state: 'MH' },
+    hobbies: [ 'sport', 'cocking' ]
+  },
+  {
+    _id: ObjectId("6517cab375752d0d39dfbc5a"),
+    name: 'name234',
+    age: 27,
+    settingvalue: 'wewant in all doc',
+    address: { add1: '31543451', add2: '78287652', city: 'Mumbai', state: 'MH' },
+    hobbies: [ 'sport', 'cocking' ]
+  },
+  {
+    _id: 'id_1',
+    name: 'namewithid',
+    newvalue: 'testvalueforupdate',
+    settingvalue: 'wewant in all doc',
+    hobbies: [ 'sport', 'cocking' ]
+  },
+  {
+    _id: ObjectId("6517ce5475752d0d39dfbc5b"),
+    name: 'manyname',
+    age: 30,
+    settingvalue: 'wewant in all doc',
+    address: { add1: '31543451', add2: '78287652', city: 'Delhi', state: 'DL' },
+    hobbies: [ 'sport', 'cocking' ]
+  },
+  {
+    _id: ObjectId("6517ce5475752d0d39dfbc5c"),
+    name: 'manyname2',
+    age: 32,
+    newvalue: 'updateonevallue',
+    settingvalue: 'wewant in all doc',
+    hobbies: [ 'sport', 'cocking' ]
+  }
+]
+
+testdb> db.refdb.insertOne({name:"Name1",Phone:"9098080", email:"test@test"})
+{
+  acknowledged: true,
+  insertedId: ObjectId("6517f16375752d0d39dfbc62")
+}
+testdb> db.refdb.insertOne({name:"name234",Phone:"9098dk080", email:"tttest@test"})
+{
+  acknowledged: true,
+  insertedId: ObjectId("6517f18275752d0d39dfbc63")
+}
+testdb> db.refdb.insertOne({name:"namewithid",Phone:"9096754080", email:"tt6666test@test"})
+{
+  acknowledged: true,
+  insertedId: ObjectId("6517f19c75752d0d39dfbc64")
+}
+testdb> db.refdb.find()
+[
+  {
+    _id: ObjectId("6517f16375752d0d39dfbc62"),
+    name: 'Name1',
+    Phone: '9098080',
+    email: 'test@test'
+  },
+  {
+    _id: ObjectId("6517f18275752d0d39dfbc63"),
+    name: 'name234',
+    Phone: '9098dk080',
+    email: 'tttest@test'
+  },
+  {
+    _id: ObjectId("6517f19c75752d0d39dfbc64"),
+    name: 'namewithid',
+    Phone: '9096754080',
+    email: 'tt6666test@test'
+  }
+]
+
+testdb> db.tempdb.aggregate([{$lookup:{from:"refdb", localField:"name",foreignField:"name", as: "additiondetails"}}]).pretty()
+
+
+// Schema validations
+db.createCollection('posts', {
+  validator: {
+    $jsonSchema: {
+      bsonType: 'object',
+      required: ['title', 'text', 'creator', 'comments'],
+      properties: {
+        title: {
+          bsonType: 'string',
+          description: 'must be a string and is required'
+        },
+        text: {
+          bsonType: 'string',
+          description: 'must be a string and is required'
+        },
+        creator: {
+          bsonType: 'objectId',
+          description: 'must be an objectid and is required'
+        },
+        comments: {
+          bsonType: 'array',
+          description: 'must be an array and is required',
+          items: {
+            bsonType: 'object',
+            required: ['text', 'author'],
+            properties: {
+              text: {
+                bsonType: 'string',
+                description: 'must be a string and is required'
+              },
+              author: {
+                bsonType: 'objectId',
+                description: 'must be an objectid and is required'
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+});
+
+
+Change validations
+db.runCommand({
+  collMod: 'posts',
+  validator: {
+    $jsonSchema: {
+      bsonType: 'object',
+      required: ['title', 'text', 'creator', 'comments'],
+      properties: {
+        title: {
+          bsonType: 'string',
+          description: 'must be a string and is required'
+        },
+        text: {
+          bsonType: 'string',
+          description: 'must be a string and is required'
+        },
+        creator: {
+          bsonType: 'objectId',
+          description: 'must be an objectid and is required'
+        },
+        comments: {
+          bsonType: 'array',
+          description: 'must be an array and is required',
+          items: {
+            bsonType: 'object',
+            required: ['text', 'author'],
+            properties: {
+              text: {
+                bsonType: 'string',
+                description: 'must be a string and is required'
+              },
+              author: {
+                bsonType: 'objectId',
+                description: 'must be an objectid and is required'
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  validationAction: 'warn'
+});

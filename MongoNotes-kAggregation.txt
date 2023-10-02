@@ -1,0 +1,595 @@
+ 
+ // upload Person.json
+ db.persons.aggregate([{$match:{gender:"female"}}]).pretty()
+ 
+   {
+    _id: ObjectId("651a69c26bbbc194b7fc39fa"),
+    gender: 'female',
+    name: { title: 'ms', first: 'maya', last: 'macdonald' },
+    location: {
+      street: '100 george st',
+      city: 'winfield',
+      state: 'yukon',
+      postcode: 'K4Q 2U2',
+      coordinates: { latitude: '9.4191', longitude: '-102.1065' },
+      timezone: {
+        offset: '+9:00',
+        description: 'Tokyo, Seoul, Osaka, Sapporo, Yakutsk'
+      }
+    },
+    email: 'maya.macdonald@example.com',
+    login: {
+      uuid: '934e8a54-0d46-4cd7-accd-a0a67f19299b',
+      username: 'bigfish793',
+      password: 'kiss',
+      salt: 'IYteMQWZ',
+      md5: '6d975a2ef56a3f129949ee6133dca67e',
+      sha1: '22a304b1577abe6b303f016d4069f81c4aac814c',
+      sha256: 'da09a9dff1d93bc54044e89c18df814f1bc651331708834a310458a96145260c'
+    },
+    dob: { date: '1953-01-17T16:10:03Z', age: 65 },
+    registered: { date: '2009-10-08T16:00:18Z', age: 8 },
+    phone: '343-367-3594',
+    cell: '329-394-0526',
+    id: { name: '', value: null },
+    picture: {
+      large: 'https://randomuser.me/api/portraits/women/73.jpg',
+      medium: 'https://randomuser.me/api/portraits/med/women/73.jpg',
+      thumbnail: 'https://randomuser.me/api/portraits/thumb/women/73.jpg'
+    },
+    nat: 'CA'
+  }
+ 
+ // match -> group by first is always _id 
+db.persons.aggregate([ { $match: { gender: 'female' } }, { $group: { _id: { state: "$location.state" }, totalPersons: { $sum: 1 } } }] ).pretty();
+[
+  { _id: { state: 'amazonas' }, totalPersons: 4 },
+  { _id: { state: 'cumbria' }, totalPersons: 2 },
+  { _id: { state: 'south yorkshire' }, totalPersons: 3 },
+  { _id: { state: 'berlin' }, totalPersons: 7 },
+  { _id: { state: 'noord-holland' }, totalPersons: 9 },
+  { _id: { state: 'prince edward island' }, totalPersons: 11 },
+  { _id: { state: 'landes' }, totalPersons: 1 },
+  { _id: { state: 'calvados' }, totalPersons: 1 },
+  { _id: { state: 'قم' }, totalPersons: 4 },
+  { _id: { state: "hawke's bay" }, totalPersons: 7 },
+  { _id: { state: 'antalya' }, totalPersons: 1 },
+  { _id: { state: 'cork' }, totalPersons: 6 },
+  { _id: { state: 'nunavut' }, totalPersons: 14 },
+  { _id: { state: 'iowa' }, totalPersons: 4 },
+  { _id: { state: 'aksaray' }, totalPersons: 1 },
+  { _id: { state: 'یزد' }, totalPersons: 1 },
+  { _id: { state: 'zug' }, totalPersons: 6 },
+  { _id: { state: 'مازندران' }, totalPersons: 9 },
+  { _id: { state: 'elazığ' }, totalPersons: 4 },
+  { _id: { state: 'rio grande do norte' }, totalPersons: 8 }
+]
+
+db.persons.aggregate([
+     { $match: { gender: 'female' } },
+     { $group: { _id: { state: "$location.state" }, totalPersons: { $sum: 1 } } },
+     { $sort: { totalPersons: -1 } }
+ ]).pretty();
+[
+  { _id: { state: 'midtjylland' }, totalPersons: 33 },
+  { _id: { state: 'nordjylland' }, totalPersons: 27 },
+  { _id: { state: 'syddanmark' }, totalPersons: 24 },
+  { _id: { state: 'australian capital territory' }, totalPersons: 24 },
+  { _id: { state: 'new south wales' }, totalPersons: 24 },
+  { _id: { state: 'south australia' }, totalPersons: 22 },
+  { _id: { state: 'hovedstaden' }, totalPersons: 21 },
+  { _id: { state: 'danmark' }, totalPersons: 21 },
+  { _id: { state: 'overijssel' }, totalPersons: 20 },
+  { _id: { state: 'queensland' }, totalPersons: 20 },
+  { _id: { state: 'sjælland' }, totalPersons: 19 },
+  { _id: { state: 'nova scotia' }, totalPersons: 17 },
+  { _id: { state: 'canterbury' }, totalPersons: 16 },
+  { _id: { state: 'northwest territories' }, totalPersons: 16 },
+  { _id: { state: 'yukon' }, totalPersons: 16 },
+  { _id: { state: 'gelderland' }, totalPersons: 16 },
+  { _id: { state: 'tasmania' }, totalPersons: 15 },
+  { _id: { state: 'bayern' }, totalPersons: 15 },
+  { _id: { state: 'northern territory' }, totalPersons: 15 },
+  { _id: { state: 'noord-brabant' }, totalPersons: 14 }
+]
+Type "it" for more
+
+
+contacts> db.persons.aggregate([ { $project: { _id: 0, gender: 1, fullName: { $concat: [ "$name.first", "$name.last"]}}}]);
+[
+  { gender: 'male', fullName: 'victorpedersen' },
+  { gender: 'male', fullName: 'carljacobs' },
+  { gender: 'male', fullName: 'zacharylo' },
+  { gender: 'male', fullName: 'harveychambers' },
+  { gender: 'male', fullName: 'gideonvan drongelen' },
+  { gender: 'female', fullName: 'پریاپارسا' },
+  { gender: 'female', fullName: 'maevawilson' },
+  { gender: 'male', fullName: 'elijahlewis' },
+  { gender: 'female', fullName: 'olavoehme' },
+  { gender: 'female', fullName: 'madeleinetill' },
+  { gender: 'female', fullName: 'shonakemperman' },
+  { gender: 'female', fullName: 'louisegraham' },
+  { gender: 'male', fullName: 'isolinoviana' },
+  { gender: 'female', fullName: 'mestankaplangı' },
+  { gender: 'female', fullName: 'katiewelch' },
+  { gender: 'female', fullName: 'sandralorenzo' },
+  { gender: 'male', fullName: 'بنیامینسالاری' },
+  { gender: 'female', fullName: 'andreiaarnaud' },
+  { gender: 'female', fullName: 'anaëlleadam' },
+  { gender: 'female', fullName: 'anneruiz' }
+]
+
+
+// project  - $contact, $toUpper, $substrCP
+db.persons.aggregate([
+    {
+      $project: {
+        _id: 0,
+        gender: 1,
+        fullName: {
+          $concat: [
+            { $toUpper: { $substrCP: ['$name.first', 0, 1] } },
+            {
+              $substrCP: [
+                '$name.first',
+                1,
+                { $subtract: [{ $strLenCP: '$name.first' }, 1] }
+              ]
+            },
+            ' ',
+            { $toUpper: { $substrCP: ['$name.last', 0, 1] } },
+            {
+              $substrCP: [
+                '$name.last',
+                1,
+                { $subtract: [{ $strLenCP: '$name.last' }, 1] }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]).pretty();
+
+
+// working with dates  convert => todate
+
+$convert ( input, to={date, decimal})
+contacts> db.persons.aggregate([ { $project: { _id: 0, gender: 1, birthdate:{$convert :{ input:"$dob.date", to:"date"}}, fullName: { $concat: [ "$name.first", "$name.last"]}}}])
+
+db.persons.aggregate([
+    {
+      $project: {
+        _id: 0,
+        name: 1,
+        email: 1,
+        birthdate: { $convert: { input: '$dob.date', to: 'date' } },
+        age: "$dob.age",
+        location: {
+          type: 'Point',
+          coordinates: [
+            {
+              $convert: {
+                input: '$location.coordinates.longitude',
+                to: 'double',
+                onError: 0.0,
+                onNull: 0.0
+              }
+            },
+            {
+              $convert: {
+                input: '$location.coordinates.latitude',
+                to: 'double',
+                onError: 0.0,
+                onNull: 0.0
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      $project: {
+        gender: 1,
+        email: 1,
+        location: 1,
+        birthdate: 1,
+        age: 1,
+        fullName: {
+          $concat: [
+            { $toUpper: { $substrCP: ['$name.first', 0, 1] } },
+            {
+              $substrCP: [
+                '$name.first',
+                1,
+                { $subtract: [{ $strLenCP: '$name.first' }, 1] }
+              ]
+            },
+            ' ',
+            { $toUpper: { $substrCP: ['$name.last', 0, 1] } },
+            {
+              $substrCP: [
+                '$name.last',
+                1,
+                { $subtract: [{ $strLenCP: '$name.last' }, 1] }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]).pretty();
+
+
+
+db.persons.aggregate([
+    {
+      $project: {
+        _id: 0,
+        name: 1,
+        email: 1,
+        birthdate: { $toDate: '$dob.date' },
+        age: "$dob.age",
+        location: {
+          type: 'Point',
+          coordinates: [
+            {
+              $convert: {
+                input: '$location.coordinates.longitude',
+                to: 'double',
+                onError: 0.0,
+                onNull: 0.0
+              }
+            },
+            {
+              $convert: {
+                input: '$location.coordinates.latitude',
+                to: 'double',
+                onError: 0.0,
+                onNull: 0.0
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      $project: {
+        gender: 1,
+        email: 1,
+        location: 1,
+        birthdate: 1,
+        age: 1,
+        fullName: {
+          $concat: [
+            { $toUpper: { $substrCP: ['$name.first', 0, 1] } },
+            {
+              $substrCP: [
+                '$name.first',
+                1,
+                { $subtract: [{ $strLenCP: '$name.first' }, 1] }
+              ]
+            },
+            ' ',
+            { $toUpper: { $substrCP: ['$name.last', 0, 1] } },
+            {
+              $substrCP: [
+                '$name.last',
+                1,
+                { $subtract: [{ $strLenCP: '$name.last' }, 1] }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]).pretty();
+
+//convertors short cut, $ toDecimal, toString
+
+db.persons.aggregate([ { $project: { _id: 0, gender: 1, birthdate:{$toDate :"$dob.date"}, fullName: { $concat: [ "$name.first", "$name.last"]}}}]);
+
+db.persons.aggregate([
+    {
+      $project: {
+        _id: 0,
+        name: 1,
+        email: 1,
+        birthdate: { $toDate: '$dob.date' },
+        age: "$dob.age",
+        location: {
+          type: 'Point',
+          coordinates: [
+            {
+              $convert: {
+                input: '$location.coordinates.longitude',
+                to: 'double',
+                onError: 0.0,
+                onNull: 0.0
+              }
+            },
+            {
+              $convert: {
+                input: '$location.coordinates.latitude',
+                to: 'double',
+                onError: 0.0,
+                onNull: 0.0
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      $project: {
+        gender: 1,
+        email: 1,
+        location: 1,
+        birthdate: 1,
+        age: 1,
+        fullName: {
+          $concat: [
+            { $toUpper: { $substrCP: ['$name.first', 0, 1] } },
+            {
+              $substrCP: [
+                '$name.first',
+                1,
+                { $subtract: [{ $strLenCP: '$name.first' }, 1] }
+              ]
+            },
+            ' ',
+            { $toUpper: { $substrCP: ['$name.last', 0, 1] } },
+            {
+              $substrCP: [
+                '$name.last',
+                1,
+                { $subtract: [{ $strLenCP: '$name.last' }, 1] }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    { $group: { _id: { birthYear: { $isoWeekYear: "$birthdate" } }, numPersons: { $sum: 1 } } },
+    { $sort: { numPersons: -1 } }
+  ]).pretty();
+
+
+contacts> db.persons.aggregate([ { $project: { _id: 0, gender: 1, birthdate:{$toDate :"$dob.date"}, fullName: { $concat: [ "$name.first", "$name.last"]}}},{$group:{_id:{birthYear:{$isoWeekYear:"$birthdate"}}, numPerson:{$sum:1}}}]);
+
+
+// 
+
+db.friends.insertMany([ { "name": "Max", "hobbies": ["Sports", "Cooking"], "age": 29, "examScores": [ { "difficulty": 4, "score": 57.9 }, { "difficulty": 6, "score": 62.1 }, { "difficulty": 3, "score": 88.5 }] }, { "name": "Manu", "hobbies": ["Eating", "Data Analytics"], "age": 30, "examScores": [ { "difficulty": 7, "score": 52.1 }, { "difficulty": 2, "score": 74.3 }, { "difficulty": 5, "score": 53.1 }] }, { "name": "Maria", "hobbies": ["Cooking", "Skiing"], "age": 29, "examScores": [ { "difficulty": 3, "score": 75.1 }, { "difficulty": 8, "score": 44.2 }, { "difficulty": 6, "score": 61.5 }] }] )
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId("651a7135bd2b9a4eff6dee14"),
+    '1': ObjectId("651a7135bd2b9a4eff6dee15"),
+    '2': ObjectId("651a7135bd2b9a4eff6dee16")
+  }
+}
+
+// 
+
+db.friends.aggregate([
+    { $unwind: "$hobbies" }, 
+    { $group: { _id: { age: "$age" }, allHobbies: { $push: "$hobbies" } } }
+  ]).pretty();
+
+
+
+db.friends.aggregate([
+    { $unwind: "$hobbies" }, 
+    { $group: { _id: { age: "$age" }, allHobbies: { $addToSet: "$hobbies" } } }
+  ]).pretty();
+
+
+
+db.friends.aggregate([
+    { $project: { _id: 0, examScore: { $slice: ["$examScores", 2, 1] } } }
+  ]).pretty();
+
+
+
+
+db.friends.aggregate([
+    { $project: { _id: 0, numScores: { $size: "$examScores" } } }
+  ]).pretty();
+
+
+
+db.friends.aggregate([
+    {
+      $project: {
+        _id: 0,
+        scores: { $filter: { input: '$examScores', as: 'sc', cond: { $gt: ["$$sc.score", 60] } } }
+      }
+    }
+  ]).pretty();
+
+
+
+db.friends.aggregate([
+    { $unwind: "$examScores" },
+    { $project: { _id: 1, name: 1, age: 1, score: "$examScores.score" } },
+    { $sort: { score: -1 } },
+    { $group: { _id: "$_id", name: { $first: "$name" }, maxScore: { $max: "$score" } } },
+    { $sort: { maxScore: -1 } }
+  ]).pretty();
+
+[
+  {
+    _id: ObjectId("651a7135bd2b9a4eff6dee14"),
+    name: 'Max',
+    maxScore: 88.5
+  },
+  {
+    _id: ObjectId("651a7135bd2b9a4eff6dee16"),
+    name: 'Maria',
+    maxScore: 75.1
+  },
+  {
+    _id: ObjectId("651a7135bd2b9a4eff6dee15"),
+    name: 'Manu',
+    maxScore: 74.3
+  }
+]
+
+
+
+db.persons.aggregate([
+    {
+      $bucket: {
+        groupBy: '$dob.age',
+        boundaries: [18, 30, 40, 50, 60, 120],
+        output: {
+          name: { $push:"$name.first" }
+        }
+      }
+    }
+  ])
+  .pretty();
+
+
+
+
+db.persons
+  .aggregate([
+    {
+      $bucket: {
+        groupBy: '$dob.age',
+        boundaries: [18, 30, 40, 50, 60, 120],
+        output: {
+          numPersons: { $sum: 1 },
+          averageAge: { $avg: '$dob.age' }
+        }
+      }
+    }
+  ])
+  .pretty();
+
+db.persons.aggregate([
+    {
+      $bucketAuto: {
+        groupBy: '$dob.age',
+        buckets: 5,
+        output: {
+          numPersons: { $sum: 1 },
+          averageAge: { $avg: '$dob.age' }
+        }
+      }
+    }
+  ]).pretty();
+
+
+
+
+
+db.persons.aggregate([
+    { $match: { gender: "male" } },
+    { $project: { _id: 0, gender: 1, name: { $concat: ["$name.first", " ", "$name.last"] }, birthdate: { $toDate: "$dob.date" } } },
+    { $sort: { birthdate: 1 } },
+    { $skip: 10 },
+    { $limit: 10 }
+  ]).pretty();
+  
+// 
+
+db.persons.aggregate([
+    {
+      $project: {
+        _id: 0,
+        name: 1,
+        email: 1,
+        birthdate: { $toDate: '$dob.date' },
+        age: "$dob.age",
+        location: {
+          type: 'Point',
+          coordinates: [
+            {
+              $convert: {
+                input: '$location.coordinates.longitude',
+                to: 'double',
+                onError: 0.0,
+                onNull: 0.0
+              }
+            },
+            {
+              $convert: {
+                input: '$location.coordinates.latitude',
+                to: 'double',
+                onError: 0.0,
+                onNull: 0.0
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      $project: {
+        gender: 1,
+        email: 1,
+        location: 1,
+        birthdate: 1,
+        age: 1,
+        fullName: {
+          $concat: [
+            { $toUpper: { $substrCP: ['$name.first', 0, 1] } },
+            {
+              $substrCP: [
+                '$name.first',
+                1,
+                { $subtract: [{ $strLenCP: '$name.first' }, 1] }
+              ]
+            },
+            ' ',
+            { $toUpper: { $substrCP: ['$name.last', 0, 1] } },
+            {
+              $substrCP: [
+                '$name.last',
+                1,
+                { $subtract: [{ $strLenCP: '$name.last' }, 1] }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    { $out: "transformedPersons" }
+  ]).pretty();
+
+
+
+  
+  
+  
+db.transformedPersons.aggregate([
+    {
+      $geoNear: {
+        near: {
+          type: 'Point',
+          coordinates: [-18.4, -42.8]
+        },
+        maxDistance: 1000000,
+        num: 10,
+        query: { age: { $gt: 30 } },
+        distanceField: "distance"
+      }
+    }
+  ]).pretty();
+
+
+
+// out
+contacts> db.persons.aggregate([{$match:{gender:"male"}}, {$project:{_id:0, gender:1, email:1}}, {$out:"testOut"}])
+
+
+
+contacts> db.testOut.findOne()
+{
+  _id: ObjectId("651a770e2165b26c3d6d1216"),
+  gender: 'male',
+  email: 'victor.pedersen@example.com'
+}
